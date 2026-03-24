@@ -1,34 +1,28 @@
 @extends('layouts.app')
 
-@section('title', app()->getLocale() === 'ar' ? 'تعديل بيانات المريض' : 'Edit Patient')
-@section('page-title', app()->getLocale() === 'ar' ? 'تعديل بيانات المريض' : 'Edit Patient')
+@section('title', app()->getLocale() === 'ar' ? 'إكمال ملف المريض' : 'Complete Patient Profile')
+@section('page-title', app()->getLocale() === 'ar' ? 'إكمال ملف المريض' : 'Complete Patient Profile')
 
 @section('content')
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-person-pencil"></i> {{ app()->getLocale() === 'ar' ? 'تعديل بيانات المريض' : 'Edit Patient Information' }}
+        <h5><i class="bi bi-person-check"></i> {{ app()->getLocale() === 'ar' ? 'إكمال ملف المريض' : 'Complete Patient Profile' }}</h5>
+        <small class="text-muted">{{ $patient->full_name }} - {{ $patient->national_id }}</small>
     </div>
     <div class="card-body">
-        <form action="{{ route('patients.update', $patient) }}" method="POST">
+        <form action="{{ route('patients.complete', $patient) }}" method="POST">
             @csrf
-            @method('PUT')
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="first_name" class="form-label">{{ app()->getLocale() === 'ar' ? 'الاسم الأول' : 'First Name' }} <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('first_name') is-invalid @enderror" 
-                           id="first_name" name="first_name" value="{{ old('first_name', $patient->first_name) }}" required>
-                    @error('first_name')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <label class="form-label">{{ app()->getLocale() === 'ar' ? 'الاسم الأول' : 'First Name' }}</label>
+                    <input type="text" class="form-control" value="{{ $patient->first_name }}" disabled>
+                    <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'لا يمكن تغييره' : 'Cannot be changed' }}</small>
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label for="last_name" class="form-label">{{ app()->getLocale() === 'ar' ? 'اسم العائلة' : 'Last Name' }} <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('last_name') is-invalid @enderror" 
-                           id="last_name" name="last_name" value="{{ old('last_name', $patient->last_name) }}" required>
-                    @error('last_name')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <label class="form-label">{{ app()->getLocale() === 'ar' ? 'اسم العائلة' : 'Last Name' }}</label>
+                    <input type="text" class="form-control" value="{{ $patient->last_name }}" disabled>
+                    <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'لا يمكن تغييره' : 'Cannot be changed' }}</small>
                 </div>
             </div>
             
@@ -53,16 +47,16 @@
             </div>
             
             <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-md-6 mb-3">
                     <label for="birth_date" class="form-label">{{ app()->getLocale() === 'ar' ? 'تاريخ الميلاد' : 'Birth Date' }} <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control @error('birth_date') is-invalid @enderror"
-                           id="birth_date" name="birth_date" value="{{ old('birth_date', $patient->birth_date ? $patient->birth_date->format('Y-m-d') : '') }}" required>
+                    <input type="date" class="form-control @error('birth_date') is-invalid @enderror" 
+                           id="birth_date" name="birth_date" value="{{ old('birth_date', $patient->birth_date?->format('Y-m-d')) }}" required>
                     @error('birth_date')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 
-                <div class="col-md-4 mb-3">
+                <div class="col-md-6 mb-3">
                     <label for="birth_place" class="form-label">{{ app()->getLocale() === 'ar' ? 'مكان الميلاد' : 'Birth Place' }} <span class="text-danger">*</span></label>
                     <input type="text" class="form-control @error('birth_place') is-invalid @enderror" 
                            id="birth_place" name="birth_place" value="{{ old('birth_place', $patient->birth_place) }}" required>
@@ -70,8 +64,10 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                
-                <div class="col-md-4 mb-3">
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
                     <label for="national_id" class="form-label">{{ app()->getLocale() === 'ar' ? 'الرقم الوطني' : 'National ID' }} <span class="text-danger">*</span></label>
                     <input type="text" class="form-control @error('national_id') is-invalid @enderror" 
                            id="national_id" name="national_id" value="{{ old('national_id', $patient->national_id) }}" required>
@@ -79,9 +75,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-            </div>
-            
-            <div class="row">
+                
                 <div class="col-md-6 mb-3">
                     <label for="phone" class="form-label">{{ app()->getLocale() === 'ar' ? 'رقم الهاتف' : 'Phone Number' }} <span class="text-danger">*</span></label>
                     <input type="text" class="form-control @error('phone') is-invalid @enderror" 
@@ -94,9 +88,9 @@
             
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> {{ app()->getLocale() === 'ar' ? 'تحديث' : 'Update' }}
+                    <i class="bi bi-check-circle"></i> {{ app()->getLocale() === 'ar' ? 'حفظ وإكمال' : 'Save & Complete' }}
                 </button>
-                <a href="{{ route('patients.show', $patient) }}" class="btn btn-secondary">
+                <a href="{{ route('patients.incomplete') }}" class="btn btn-secondary">
                     <i class="bi bi-x-circle"></i> {{ app()->getLocale() === 'ar' ? 'إلغاء' : 'Cancel' }}
                 </a>
             </div>

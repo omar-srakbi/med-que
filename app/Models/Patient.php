@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use App\Auditable;
 
 class Patient extends Model
@@ -22,12 +23,16 @@ class Patient extends Model
         'national_id',
         'phone',
         'created_by',
+        'is_profile_complete',
+        'completed_at',
     ];
 
     protected function casts(): array
     {
         return [
             'birth_date' => 'date',
+            'is_profile_complete' => 'boolean',
+            'completed_at' => 'datetime',
         ];
     }
 
@@ -49,5 +54,30 @@ class Patient extends Model
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
+    }
+
+    // Scopes
+    public function scopeIncomplete(Builder $query): Builder
+    {
+        return $query->where('is_profile_complete', false);
+    }
+
+    public function scopeComplete(Builder $query): Builder
+    {
+        return $query->where('is_profile_complete', true);
+    }
+
+    // Methods
+    public function isComplete(): bool
+    {
+        return $this->is_profile_complete;
+    }
+
+    public function markComplete(): void
+    {
+        $this->update([
+            'is_profile_complete' => true,
+            'completed_at' => now(),
+        ]);
     }
 }

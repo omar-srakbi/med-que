@@ -170,6 +170,7 @@ class RoleController extends Controller
             ['value' => '*', 'label' => app()->getLocale() === 'ar' ? 'جميع الصلاحيات' : 'All Permissions', 'description' => app()->getLocale() === 'ar' ? 'وصول كامل للنظام' : 'Full system access'],
             ['value' => 'view_patients', 'label' => app()->getLocale() === 'ar' ? 'عرض المرضى' : 'View Patients', 'description' => app()->getLocale() === 'ar' ? 'عرض بيانات المرضى وسجلاتهم' : 'View patient data and history'],
             ['value' => 'manage_patients', 'label' => app()->getLocale() === 'ar' ? 'إدارة المرضى' : 'Manage Patients', 'description' => app()->getLocale() === 'ar' ? 'إضافة وتعديل بيانات المرضى' : 'Add and edit patient information'],
+            ['value' => 'delete_patients', 'label' => app()->getLocale() === 'ar' ? 'حذف المرضى' : 'Delete Patients', 'description' => app()->getLocale() === 'ar' ? 'القدرة على حذف سجلات المرضى' : 'Can delete patient records'],
             ['value' => 'create_tickets', 'label' => app()->getLocale() === 'ar' ? 'إنشاء تذاكر' : 'Create Tickets', 'description' => app()->getLocale() === 'ar' ? 'إنشاء تذاكر لنفس اليوم' : 'Create tickets for same day'],
             ['value' => 'delete_tickets', 'label' => app()->getLocale() === 'ar' ? 'حذف التذاكر' : 'Delete Tickets', 'description' => app()->getLocale() === 'ar' ? 'حذف التذاكر غير المكتملة' : 'Delete incomplete tickets'],
             ['value' => 'delete_completed_tickets', 'label' => app()->getLocale() === 'ar' ? 'حذف التذاكر المكتملة' : 'Delete Completed Tickets', 'description' => app()->getLocale() === 'ar' ? 'حذف التذاكر التي اكتملت' : 'Delete tickets that are completed'],
@@ -178,6 +179,8 @@ class RoleController extends Controller
             ['value' => 'view_medical_records', 'label' => app()->getLocale() === 'ar' ? 'عرض السجلات الطبية' : 'View Medical Records', 'description' => app()->getLocale() === 'ar' ? 'عرض السجلات الطبية للمرضى' : 'View patient medical records'],
             ['value' => 'manage_medical_records', 'label' => app()->getLocale() === 'ar' ? 'إدارة السجلات الطبية' : 'Manage Medical Records', 'description' => app()->getLocale() === 'ar' ? 'إنشاء وتعديل السجلات الطبية' : 'Create and edit medical records'],
             ['value' => 'manage_settings', 'label' => app()->getLocale() === 'ar' ? 'إدارة الإعدادات' : 'Manage Settings', 'description' => app()->getLocale() === 'ar' ? 'إعدادات التذاكر والطباعة' : 'Ticket and printing settings'],
+            ['value' => 'quick_registration', 'label' => app()->getLocale() === 'ar' ? 'التسجيل السريع' : 'Quick Registration', 'description' => app()->getLocale() === 'ar' ? 'إنشاء مرضى بمعلومات قليلة من خلال التذاكر' : 'Create patients with minimal info from tickets'],
+            ['value' => 'complete_patient_profiles', 'label' => app()->getLocale() === 'ar' ? 'إكمال ملفات المرضى' : 'Complete Patient Profiles', 'description' => app()->getLocale() === 'ar' ? 'إكمال معلومات المرضى غير المكتملة' : 'Complete incomplete patient information'],
         ];
     }
 }

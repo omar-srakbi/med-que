@@ -15,7 +15,9 @@ use App\Http\Controllers\QueueController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\AddAdminController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\IncompletePatientController;
 use App\Http\Controllers\Api\DepartmentServiceController;
+use App\Http\Controllers\Api\PatientSearchController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes
@@ -33,12 +35,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/api-data', [DashboardController::class, 'apiData'])->name('dashboard.api-data');
     
     // API routes
     Route::get('/api/departments/{departmentId}/services', [DepartmentServiceController::class, 'index']);
+    Route::get('/api/patients/search', [PatientSearchController::class, 'search']);
+    Route::post('/api/patients/search-or-create', [PatientSearchController::class, 'searchOrCreate']);
     
     // Patient routes
     Route::resource('patients', PatientController::class);
+    Route::get('patients/incomplete', [IncompletePatientController::class, 'index'])->name('patients.incomplete');
+    Route::get('patients/{patient}/complete', [IncompletePatientController::class, 'complete'])->name('patients.complete');
+    Route::post('patients/{patient}/complete', [IncompletePatientController::class, 'update']);
     
     // Staff routes (admin only)
     Route::resource('staff', StaffController::class)->middleware('role:Admin');

@@ -15,7 +15,7 @@
                 <h5 class="card-title text-primary">{{ $patient->full_name }}</h5>
                 <hr>
                 <p><strong>{{ app()->getLocale() === 'ar' ? 'الرقم الوطني' : 'National ID' }}:</strong> {{ $patient->national_id }}</p>
-                <p><strong>{{ app()->getLocale() === 'ar' ? 'تاريخ الميلاد' : 'Birth Date' }}:</strong> {{ $patient->birth_date->format('Y-m-d') }}</p>
+                <p><strong>{{ app()->getLocale() === 'ar' ? 'تاريخ الميلاد' : 'Birth Date' }}:</strong> {{ $patient->birth_date ? $patient->birth_date->format('Y-m-d') : '-' }}</p>
                 <p><strong>{{ app()->getLocale() === 'ar' ? 'مكان الميلاد' : 'Birth Place' }}:</strong> {{ $patient->birth_place }}</p>
                 <p><strong>{{ app()->getLocale() === 'ar' ? 'الهاتف' : 'Phone' }}:</strong> {{ $patient->phone }}</p>
                 <p><strong>{{ app()->getLocale() === 'ar' ? 'اسم الأب' : 'Father Name' }}:</strong> {{ $patient->father_name }}</p>

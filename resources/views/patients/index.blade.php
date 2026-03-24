@@ -54,7 +54,7 @@
                     <tr>
                         <td>{{ $patient->national_id }}</td>
                         <td>{{ $patient->full_name }}</td>
-                        <td>{{ $patient->birth_date->format('Y-m-d') }}</td>
+                        <td>{{ $patient->birth_date ? $patient->birth_date->format('Y-m-d') : '-' }}</td>
                         <td>{{ $patient->phone }}</td>
                         <td>{{ $patient->creator->full_name }}</td>
                         <td>{{ $patient->created_at->format('Y-m-d H:i') }}</td>
@@ -63,11 +63,21 @@
                                 <a href="{{ route('patients.show', $patient) }}" class="btn btn-info">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                @can('create_patients')
+                                @if(auth()->user()->hasPermission('manage_patients'))
                                 <a href="{{ route('patients.edit', $patient) }}" class="btn btn-warning">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                @endcan
+                                @endif
+                                @if(auth()->user()->hasPermission('delete_patients'))
+                                <form action="{{ route('patients.destroy', $patient) }}" method="POST" class="d-inline" 
+                                      onsubmit="return confirm('{{ app()->getLocale() === 'ar' ? 'هل أنت متأكد من حذف هذا المريض؟' : 'Are you sure you want to delete this patient?' }}')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                @endif
                             </div>
                         </td>
                     </tr>

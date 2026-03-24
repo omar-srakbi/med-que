@@ -135,6 +135,15 @@
                     </li>
                     @endif
                     
+                    @if(auth()->user()->hasPermission('complete_patient_profiles'))
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('patients.incomplete') ? 'active' : '' }}" href="{{ route('patients.incomplete') }}">
+                            <i class="bi bi-exclamation-triangle text-warning"></i>
+                            {{ app()->getLocale() === 'ar' ? 'الملفات غير المكتملة' : 'Incomplete Profiles' }}
+                        </a>
+                    </li>
+                    @endif
+                    
                     @if(auth()->user()->hasPermission('create_tickets') || auth()->user()->hasPermission('create_advance_tickets'))
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('tickets.*') ? 'active' : '' }}" href="{{ route('tickets.index') }}">
@@ -424,6 +433,9 @@
     }
     .search-item:last-child { border-bottom: none; }
     </style>
+
+    <!-- Chart.js for dashboard charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     @stack('scripts')
 </body>

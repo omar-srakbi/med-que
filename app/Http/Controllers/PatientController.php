@@ -83,8 +83,20 @@ class PatientController extends Controller
 
     public function destroy(Patient $patient)
     {
-        $patient->delete();
+        // Check if user has permission to delete patients
+        $user = auth()->user();
+        $permissions = $user->role->permissions ?? [];
         
+        $canDelete = in_array('*', $permissions) || in_array('delete_patients', $permissions);
+        
+        if (!$canDelete) {
+            return back()->withErrors(['error' => app()->getLocale() === 'ar' 
+                ? 'ليس لديك صلاحية حذف المرضى' 
+                : 'You do not have permission to delete patients']);
+        }
+        
+        $patient->delete();
+
         return redirect()->route('patients.index')
             ->with('success', app()->getLocale() === 'ar' ? 'تم حذف المريض بنجاح' : 'Patient deleted successfully');
     }
