@@ -5,15 +5,6 @@
 
 @section('content')
 <div class="row">
-    <div class="col-12">
-        @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="bi bi-check-circle"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        @endif
-    </div>
-    
     <!-- Ticket Settings -->
     <div class="col-md-6">
         <div class="card">
@@ -157,21 +148,24 @@
                 <form action="{{ route('settings.update') }}" method="POST">
                     @csrf
                     <div class="mb-3">
-                        <label class="form-label">{{ app()->getLocale() === 'ar' ? 'اسم العيادة (إنجليزي)' : 'Clinic Name (English)' }}</label>
-                        <input type="text" class="form-control" name="clinic_name" value="{{ $settings['clinic_name'] ?? 'Medical Center' }}">
+                        <label for="clinic_name" class="form-label">{{ app()->getLocale() === 'ar' ? 'اسم العيادة (إنجليزي)' : 'Clinic Name (English)' }}</label>
+                        <input type="text" class="form-control" id="clinic_name" name="clinic_name" value="{{ old('clinic_name', $settings['clinic_name'] ?? 'Medical Center') }}" placeholder="Medical Center">
+                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'يظهر في واجهة النظام' : 'Appears in system header' }}</small>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">{{ app()->getLocale() === 'ar' ? 'اسم العيادة (عربي)' : 'Clinic Name (Arabic)' }}</label>
-                        <input type="text" class="form-control" name="clinic_name_ar" value="{{ $settings['clinic_name_ar'] ?? 'المركز الطبي' }}">
+                        <label for="clinic_name_ar" class="form-label">{{ app()->getLocale() === 'ar' ? 'اسم العيادة (عربي)' : 'Clinic Name (Arabic)' }}</label>
+                        <input type="text" class="form-control" id="clinic_name_ar" name="clinic_name_ar" value="{{ old('clinic_name_ar', $settings['clinic_name_ar'] ?? 'المركز الطبي') }}" placeholder="المركز الطبي">
+                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'يظهر في واجهة النظام' : 'Appears in system header' }}</small>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">{{ app()->getLocale() === 'ar' ? 'اللغة الافتراضية' : 'Default Language' }}</label>
-                        <select class="form-select" name="default_language">
-                            <option value="ar" {{ (app()->getLocale() == 'ar') ? 'selected' : '' }}>العربية</option>
-                            <option value="en" {{ (app()->getLocale() == 'en') ? 'selected' : '' }}>English</option>
+                        <label for="default_language" class="form-label">{{ app()->getLocale() === 'ar' ? 'اللغة الافتراضية' : 'Default Language' }}</label>
+                        <select class="form-select" id="default_language" name="default_language">
+                            <option value="ar" {{ old('default_language', $settings['default_language'] ?? 'ar') == 'ar' ? 'selected' : '' }}>العربية</option>
+                            <option value="en" {{ old('default_language', $settings['default_language'] ?? 'ar') == 'en' ? 'selected' : '' }}>English</option>
                         </select>
+                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'لغة النظام الافتراضية' : 'Default system language' }}</small>
                     </div>
                     
                     <button type="submit" class="btn btn-primary">

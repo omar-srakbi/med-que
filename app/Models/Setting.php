@@ -67,4 +67,12 @@ class Setting extends Model
         
         return number_format($amount, $decimals) . ' ' . $symbol;
     }
+    
+    public static function getClinicName()
+    {
+        if (app()->getLocale() === 'ar') {
+            return self::where('key', 'clinic_name_ar')->first()?->value ?? 'المركز الطبي';
+        }
+        return self::where('key', 'clinic_name')->first()?->value ?? 'Medical Center';
+    }
 }

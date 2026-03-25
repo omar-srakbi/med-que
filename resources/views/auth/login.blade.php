@@ -10,7 +10,7 @@
                 <div class="card-body p-5">
                     <div class="text-center mb-4">
                         <i class="bi bi-hospital text-primary" style="font-size: 3rem;"></i>
-                        <h3 class="mt-3">{{ app()->getLocale() === 'ar' ? 'نظام المركز الطبي' : 'Medical Center System' }}</h3>
+                        <h3 class="mt-3">{{ \App\Models\Setting::getClinicName() }}</h3>
                         <p class="text-muted">{{ app()->getLocale() === 'ar' ? 'تسجيل الدخول' : 'Login' }}</p>
                     </div>
                     

@@ -22,6 +22,17 @@ class SettingsController extends Controller
 
     public function update(Request $request)
     {
+        // General settings
+        if ($request->has('clinic_name')) {
+            \App\Models\Setting::set('clinic_name', $request->clinic_name);
+        }
+        if ($request->has('clinic_name_ar')) {
+            \App\Models\Setting::set('clinic_name_ar', $request->clinic_name_ar);
+        }
+        if ($request->has('default_language')) {
+            \App\Models\Setting::set('default_language', $request->default_language);
+        }
+        
         // Currency settings
         if ($request->has('currency_code')) {
             \App\Models\Setting::set('currency_code', $request->currency_code);

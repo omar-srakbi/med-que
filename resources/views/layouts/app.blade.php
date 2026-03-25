@@ -115,7 +115,7 @@
             <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
                 <a href="{{ route('dashboard') }}" class="sidebar-brand">
                     <i class="bi bi-hospital"></i>
-                    {{ app()->getLocale() === 'ar' ? 'نظام المركز الطبي' : 'Medical Center System' }}
+                    {{ \App\Models\Setting::getClinicName() }}
                 </a>
                 
                 <ul class="nav flex-column mt-3">
