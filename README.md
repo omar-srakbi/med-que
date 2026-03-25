@@ -137,7 +137,7 @@ A comprehensive clinic management system built with Laravel 12 for managing pati
 
 ### 1. Clone or Download
 ```bash
-cd C:\Users\omars\test1
+git clone https://github.com/omar-srakbi/med-que.git
 ```
 
 ### 2. Install Dependencies
