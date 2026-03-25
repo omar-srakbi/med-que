@@ -31,7 +31,7 @@
                             <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'أسعار الخدمات:' : 'Service Prices:' }}</small>
                             <ul class="list-unstyled mb-0 small">
                                 @foreach($department->services->take(3) as $service)
-                                <li>{{ app()->getLocale() === 'ar' ? $service->name_ar : $service->name }} - {{ number_format($service->price, 2) }} JD</li>
+                                <li>{{ app()->getLocale() === 'ar' ? $service->name_ar : $service->name }} - {{ \App\Models\Setting::formatCurrency($service->price) }}</li>
                                 @endforeach
                                 @if($department->services->count() > 3)
                                 <li class="text-muted">+ {{ $department->services->count() - 3 }} {{ app()->getLocale() === 'ar' ? 'أخرى' : 'more' }}</li>

@@ -75,7 +75,7 @@
                             <tr>
                                 <td>{{ $service->name }}</td>
                                 <td>{{ $service->name_ar }}</td>
-                                <td><strong>{{ number_format($service->price, 2) }} JD</strong></td>
+                                <td><strong>{{ \App\Models\Setting::formatCurrency($service->price) }}</strong></td>
                                 <td>
                                     @if($service->is_active)
                                         <span class="badge bg-success">{{ app()->getLocale() === 'ar' ? 'نشط' : 'Active' }}</span>
@@ -124,6 +124,11 @@
                                                     <label class="form-label">{{ app()->getLocale() === 'ar' ? 'السعر' : 'Price' }}</label>
                                                     <input type="number" step="0.01" class="form-control" name="price" value="{{ $service->price }}" required>
                                                 </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">{{ app()->getLocale() === 'ar' ? 'الاختصار' : 'Shortcut' }}</label>
+                                                    <input type="text" class="form-control" name="shortcut" value="{{ $service->shortcut }}" placeholder="e.g., CBC, XRAY, MRI">
+                                                    <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'استخدم هذا الاختصار للحجز السريع' : 'Use this shortcut for quick booking' }}</small>
+                                                </div>
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox" name="is_active" value="1" {{ $service->is_active ? 'checked' : '' }}>
                                                     <label class="form-check-label">{{ app()->getLocale() === 'ar' ? 'نشط' : 'Active' }}</label>
@@ -171,6 +176,11 @@
                     <div class="mb-3">
                         <label class="form-label">{{ app()->getLocale() === 'ar' ? 'السعر' : 'Price' }}</label>
                         <input type="number" step="0.01" class="form-control" name="price" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ app()->getLocale() === 'ar' ? 'الاختصار' : 'Shortcut' }}</label>
+                        <input type="text" class="form-control" name="shortcut" placeholder="e.g., CBC, XRAY, MRI">
+                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'استخدم هذا الاختصار للحجز السريع' : 'Use this shortcut for quick booking' }}</small>
                     </div>
                 </div>
                 <div class="modal-footer">

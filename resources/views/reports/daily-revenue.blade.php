@@ -32,7 +32,7 @@
             <div class="col-md-6">
                 <div class="card bg-success text-white">
                     <div class="card-body text-center">
-                        <h3>{{ number_format($totalRevenue, 2) }} JD</h3>
+                        <h3>{{ \App\Models\Setting::formatCurrency($totalRevenue) }}</h3>
                         <p>{{ app()->getLocale() === 'ar' ? 'إجمالي الإيرادات' : 'Total Revenue' }}</p>
                     </div>
                 </div>
@@ -62,7 +62,7 @@
                     @foreach($revenueByDept as $dept)
                     <tr>
                         <td>{{ app()->getLocale() === 'ar' ? $dept->department->name_ar : $dept->department->name }}</td>
-                        <td><strong>{{ number_format($dept->total, 2) }} JD</strong></td>
+                        <td><strong>{{ \App\Models\Setting::formatCurrency($dept->total) }}</strong></td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -94,7 +94,7 @@
                         <td>{{ $payment->ticket->ticket_number }}</td>
                         <td>{{ $payment->ticket->patient->full_name }}</td>
                         <td>{{ $payment->cashier->full_name }}</td>
-                        <td><strong>{{ number_format($payment->amount, 2) }} JD</strong></td>
+                        <td><strong>{{ \App\Models\Setting::formatCurrency($payment->amount) }}</strong></td>
                         <td>{{ $payment->created_at->format('H:i') }}</td>
                     </tr>
                     @endforeach

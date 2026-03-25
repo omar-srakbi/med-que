@@ -23,7 +23,7 @@
                 <p><strong>{{ app()->getLocale() === 'ar' ? 'البريد الإلكتروني' : 'Email' }}:</strong><br>{{ $staff->email }}</p>
                 <p><strong>{{ app()->getLocale() === 'ar' ? 'الهاتف' : 'Phone' }}:</strong><br>{{ $staff->phone ?? '-' }}</p>
                 <p><strong>{{ app()->getLocale() === 'ar' ? 'تاريخ التعيين' : 'Hire Date' }}:</strong><br>{{ $staff->hire_date?->format('Y-m-d') ?? '-' }}</p>
-                <p><strong>{{ app()->getLocale() === 'ar' ? 'الراتب' : 'Salary' }}:</strong><br>{{ $staff->salary ? number_format($staff->salary, 2) : '-' }} JD</p>
+                <p><strong>{{ app()->getLocale() === 'ar' ? 'الراتب' : 'Salary' }}:</strong><br>{{ \App\Models\Setting::formatCurrency($staff->salary ?? 0) }}</p>
                 <p><strong>{{ app()->getLocale() === 'ar' ? 'الحالة' : 'Status' }}:</strong><br>
                     @if($staff->is_active)
                         <span class="badge bg-success">{{ app()->getLocale() === 'ar' ? 'نشط' : 'Active' }}</span>
@@ -63,8 +63,8 @@
                     </div>
                     <div class="col-6">
                         <div class="text-center">
-                            <h3 class="text-success">{{ number_format($staff->payments()->whereDate('created_at', today())->sum('amount'), 2) }}</h3>
-                            <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'إيرادات اليوم' : "Today's Revenue" }} (JD)</small>
+                            <h3 class="text-success">{{ \App\Models\Setting::formatCurrency($staff->payments()->whereDate('created_at', today())->sum('amount')) }}</h3>
+                            <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'إيرادات اليوم' : "Today's Revenue" }}</small>
                         </div>
                     </div>
                 </div>

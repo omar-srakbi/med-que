@@ -82,7 +82,7 @@
                         <td>{{ $ticket->visit_date->format('Y-m-d') }}</td>
                         <td>{{ app()->getLocale() === 'ar' ? $ticket->department->name_ar : $ticket->department->name }}</td>
                         <td>{{ app()->getLocale() === 'ar' ? $ticket->service->name_ar : $ticket->service->name }}</td>
-                        <td>{{ number_format($ticket->amount_paid, 2) }} JD</td>
+                        <td>{{ \App\Models\Setting::formatCurrency($ticket->amount_paid) }}</td>
                         <td>
                             @if($ticket->completed_at)
                                 <span class="badge bg-success">{{ app()->getLocale() === 'ar' ? 'مكتمل' : 'Completed' }}</span>

@@ -12,7 +12,7 @@ class DepartmentServiceController extends Controller
     {
         $services = Service::where('department_id', $departmentId)
             ->where('is_active', true)
-            ->get(['id', 'name', 'name_ar', 'price']);
+            ->get(['id', 'name', 'name_ar', 'price', 'shortcut']);
         
         return response()->json($services);
     }

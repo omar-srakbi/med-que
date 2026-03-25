@@ -35,9 +35,9 @@ class TicketController extends Controller
     public function create()
     {
         $departments = Department::where('is_active', true)->get();
-        $patients = Patient::latest()->limit(50)->get();
+        $patients = Patient::limit(100)->orderBy('created_at', 'desc')->get();
         $canBookAdvance = auth()->user()->canBookAdvanceTickets();
-        
+
         return view('tickets.create', compact('departments', 'patients', 'canBookAdvance'));
     }
 

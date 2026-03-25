@@ -36,7 +36,7 @@
                     </tr>
                     <tr>
                         <td><strong>{{ app()->getLocale() === 'ar' ? 'المبلغ المدفوع' : 'Amount Paid' }}:</strong></td>
-                        <td class="text-end"><span class="text-success fw-bold">{{ number_format($ticket->amount_paid, 2) }} JD</span></td>
+                        <td class="text-end"><span class="text-success fw-bold">{{ \App\Models\Setting::formatCurrency($ticket->amount_paid) }}</span></td>
                     </tr>
                     <tr>
                         <td><strong>{{ app()->getLocale() === 'ar' ? 'رقم الإيصال' : 'Receipt Number' }}:</strong></td>

@@ -44,4 +44,27 @@ class Setting extends Model
         
         return true;
     }
+    
+    public static function getCurrencyCode()
+    {
+        return self::where('key', 'currency_code')->first()?->value ?? 'JOD';
+    }
+    
+    public static function getCurrencySymbol()
+    {
+        return self::where('key', 'currency_symbol')->first()?->value ?? 'JD';
+    }
+    
+    public static function getCurrencyDecimals()
+    {
+        return (int) (self::where('key', 'currency_decimals')->first()?->value ?? 2);
+    }
+    
+    public static function formatCurrency($amount)
+    {
+        $decimals = self::getCurrencyDecimals();
+        $symbol = self::getCurrencySymbol();
+        
+        return number_format($amount, $decimals) . ' ' . $symbol;
+    }
 }

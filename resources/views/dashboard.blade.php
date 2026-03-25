@@ -84,7 +84,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div>
                         <h6 class="text-muted mb-0">{{ app()->getLocale() === 'ar' ? 'إيرادات اليوم' : "Today's Revenue" }}</h6>
-                        <h3 class="mb-0 mt-1">{{ number_format($stats['today_revenue'], 2) }} <small class="text-muted">JD</small></h3>
+                        <h3 class="mb-0 mt-1">{{ \App\Models\Setting::formatCurrency($stats['today_revenue']) }}</h3>
                     </div>
                     <div class="bg-danger bg-opacity-10 rounded-circle p-3">
                         <i class="bi bi-cash-stack text-danger" style="font-size: 1.5rem;"></i>
@@ -289,7 +289,7 @@
                                 <td class="py-3">{{ app()->getLocale() === 'ar' ? $ticket->department->name_ar : $ticket->department->name }}</td>
                                 <td class="py-3">{{ app()->getLocale() === 'ar' ? $ticket->service->name_ar : $ticket->service->name }}</td>
                                 <td class="py-3"><span class="badge bg-info">{{ $ticket->queue_number }}</span></td>
-                                <td class="py-3">{{ number_format($ticket->amount_paid, 2) }} JD</td>
+                                <td class="py-3">{{ \App\Models\Setting::formatCurrency($ticket->amount_paid) }}</td>
                                 <td class="py-3">{{ $ticket->created_at_time?->format('H:i') }}</td>
                                 <td class="py-3">
                                     @if($ticket->completed_at)
@@ -377,7 +377,7 @@ if (revenueCtx) {
         data: {
             labels: {!! json_encode(array_column($revenueTrend, 'date')) !!},
             datasets: [{
-                label: '{{ app()->getLocale() === 'ar' ? 'الإيرادات' : 'Revenue' }} (JD)',
+                label: '{{ app()->getLocale() === 'ar' ? 'الإيرادات' : 'Revenue' }}',
                 data: {!! json_encode(array_column($revenueTrend, 'revenue')) !!},
                 backgroundColor: 'rgba(25, 135, 84, 0.8)',
                 borderColor: colors.success,

@@ -28,13 +28,13 @@
                         <input type="text" class="form-control" name="ticket_header" value="{{ $settings['ticket_header'] ?? '' }}">
                         <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'يظهر في أعلى التذكرة' : 'Appears at top of ticket' }}</small>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label">{{ app()->getLocale() === 'ar' ? 'تذييل التذكرة' : 'Ticket Footer' }}</label>
                         <input type="text" class="form-control" name="ticket_footer" value="{{ $settings['ticket_footer'] ?? '' }}">
                         <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'يظهر في أسفل التذكرة' : 'Appears at bottom of ticket' }}</small>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label">{{ app()->getLocale() === 'ar' ? 'تنسيق رقم التذكرة' : 'Ticket Number Format' }}</label>
                         <select class="form-select" name="ticket_format" id="ticket_format">
@@ -43,20 +43,60 @@
                             <option value="{dept}-{date}-{seq}" {{ ($settings['ticket_format'] ?? '') == '{dept}-{date}-{seq}' ? 'selected' : '' }}>CLI-20260323-0001</option>
                         </select>
                         <small class="text-muted">
-                            {prefix} = {{ app()->getLocale() === 'ar' ? 'البادئة' : 'Prefix' }}, 
-                            {date} = {{ app()->getLocale() === 'ar' ? 'التاريخ' : 'Date' }}, 
-                            {seq} = {{ app()->getLocale() === 'ar' ? 'التسلسل' : 'Sequence' }}, 
+                            {prefix} = {{ app()->getLocale() === 'ar' ? 'البادئة' : 'Prefix' }},
+                            {date} = {{ app()->getLocale() === 'ar' ? 'التاريخ' : 'Date' }},
+                            {seq} = {{ app()->getLocale() === 'ar' ? 'التسلسل' : 'Sequence' }},
                             {dept} = {{ app()->getLocale() === 'ar' ? 'القسم' : 'Department' }}
                         </small>
                     </div>
-                    
+
                     <div class="form-check form-switch mb-3">
                         <input class="form-check-input" type="checkbox" name="ticket_show_qr" value="1" {{ ($settings['ticket_show_qr'] ?? false) ? 'checked' : '' }}>
                         <label class="form-check-label">{{ app()->getLocale() === 'ar' ? 'عرض QR Code على التذكرة' : 'Show QR Code on ticket' }}</label>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> {{ app()->getLocale() === 'ar' ? 'حفظ الإعدادات' : 'Save Settings' }}
+                        <i class="bi bi-save"></i> {{ app()->getLocale() === 'ar' ? 'حفظ إعدادات التذاكر' : 'Save Ticket Settings' }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Currency Settings -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-cash-stack"></i> {{ app()->getLocale() === 'ar' ? 'إعدادات العملة' : 'Currency Settings' }}
+            </div>
+            <div class="card-body">
+                <form action="{{ route('settings.update') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="currency_code" class="form-label">{{ app()->getLocale() === 'ar' ? 'رمز العملة' : 'Currency Code' }}</label>
+                        <input type="text" class="form-control" id="currency_code" name="currency_code" value="{{ old('currency_code', \App\Models\Setting::getCurrencyCode()) }}" placeholder="e.g., JOD, USD, EUR">
+                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'مثال: JOD, USD, EUR, SAR' : 'Example: JOD, USD, EUR, SAR' }}</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="currency_symbol" class="form-label">{{ app()->getLocale() === 'ar' ? 'رمز العملة' : 'Currency Symbol' }}</label>
+                        <input type="text" class="form-control" id="currency_symbol" name="currency_symbol" value="{{ old('currency_symbol', \App\Models\Setting::getCurrencySymbol()) }}" placeholder="e.g., JD, $, €, £">
+                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'مثال: JD, $, €, £' : 'Example: JD, $, €, £' }}</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="currency_decimals" class="form-label">{{ app()->getLocale() === 'ar' ? 'عدد الخانات العشرية' : 'Decimal Places' }}</label>
+                        <select class="form-select" id="currency_decimals" name="currency_decimals">
+                            <option value="0" {{ old('currency_decimals', \App\Models\Setting::getCurrencyDecimals()) == 0 ? 'selected' : '' }}>0</option>
+                            <option value="1" {{ old('currency_decimals', \App\Models\Setting::getCurrencyDecimals()) == 1 ? 'selected' : '' }}>1</option>
+                            <option value="2" {{ old('currency_decimals', \App\Models\Setting::getCurrencyDecimals()) == 2 ? 'selected' : '' }}>2</option>
+                            <option value="3" {{ old('currency_decimals', \App\Models\Setting::getCurrencyDecimals()) == 3 ? 'selected' : '' }}>3</option>
+                        </select>
+                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'عدد الأرقام بعد الفاصلة' : 'Number of digits after decimal point' }}</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> {{ app()->getLocale() === 'ar' ? 'حفظ إعدادات العملة' : 'Save Currency Settings' }}
                     </button>
                 </form>
             </div>

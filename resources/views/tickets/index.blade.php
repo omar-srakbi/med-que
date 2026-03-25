@@ -67,7 +67,7 @@
                         <td>{{ app()->getLocale() === 'ar' ? $ticket->department->name_ar : $ticket->department->name }}</td>
                         <td>{{ app()->getLocale() === 'ar' ? $ticket->service->name_ar : $ticket->service->name }}</td>
                         <td><span class="badge bg-info">{{ $ticket->queue_number }}</span></td>
-                        <td>{{ number_format($ticket->amount_paid, 2) }}</td>
+                        <td>{{ \App\Models\Setting::formatCurrency($ticket->amount_paid) }}</td>
                         <td>{{ $ticket->created_at_time?->format('H:i') }}</td>
                         <td>
                             @if($ticket->completed_at)

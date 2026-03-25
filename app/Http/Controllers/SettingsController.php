@@ -22,24 +22,31 @@ class SettingsController extends Controller
 
     public function update(Request $request)
     {
-        $validated = $request->validate([
-            // Ticket settings
-            'ticket_header' => 'nullable|string|max:255',
-            'ticket_footer' => 'nullable|string|max:255',
-            'ticket_show_qr' => 'nullable|boolean',
-            
-            // Printer settings
-            'printer_name' => 'nullable|string|max:255',
-            'printer_ip' => 'nullable|string|max:255',
-            'main_door_display' => 'nullable|boolean',
-            
-            // General settings
-            'clinic_name' => 'nullable|string|max:255',
-            'clinic_name_ar' => 'nullable|string|max:255',
-        ]);
-
-        foreach ($validated as $key => $value) {
-            Setting::set($key, $value);
+        // Currency settings
+        if ($request->has('currency_code')) {
+            \App\Models\Setting::set('currency_code', $request->currency_code);
+        }
+        if ($request->has('currency_symbol')) {
+            \App\Models\Setting::set('currency_symbol', $request->currency_symbol);
+        }
+        if ($request->has('currency_decimals')) {
+            \App\Models\Setting::set('currency_decimals', $request->currency_decimals);
+        }
+        
+        // Ticket settings
+        if ($request->has('ticket_header')) {
+            \App\Models\Setting::set('ticket_header', $request->ticket_header);
+        }
+        if ($request->has('ticket_footer')) {
+            \App\Models\Setting::set('ticket_footer', $request->ticket_footer);
+        }
+        if ($request->has('ticket_format')) {
+            \App\Models\Setting::set('ticket_format', $request->ticket_format);
+        }
+        if ($request->has('ticket_show_qr')) {
+            \App\Models\Setting::set('ticket_show_qr', true);
+        } else {
+            \App\Models\Setting::set('ticket_show_qr', false);
         }
 
         return back()->with('success', app()->getLocale() === 'ar' ? 'تم حفظ الإعدادات بنجاح' : 'Settings saved successfully');

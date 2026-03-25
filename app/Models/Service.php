@@ -17,6 +17,7 @@ class Service extends Model
         'name_ar',
         'price',
         'is_active',
+        'shortcut',
     ];
 
     protected function casts(): array

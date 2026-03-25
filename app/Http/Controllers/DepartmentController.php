@@ -79,12 +79,13 @@ class DepartmentController extends Controller
             'name' => 'required|string|max:255',
             'name_ar' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
+            'shortcut' => 'nullable|string|max:20|unique:services,shortcut',
         ]);
-        
+
         $validated['department_id'] = $department->id;
-        
+
         Service::create($validated);
-        
+
         return back()->with('success', app()->getLocale() === 'ar' ? 'تم إضافة الخدمة بنجاح' : 'Service added successfully');
     }
 
@@ -94,11 +95,12 @@ class DepartmentController extends Controller
             'name' => 'required|string|max:255',
             'name_ar' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
+            'shortcut' => 'nullable|string|max:20|unique:services,shortcut,' . $service->id,
             'is_active' => 'boolean',
         ]);
-        
+
         $service->update($validated);
-        
+
         return back()->with('success', app()->getLocale() === 'ar' ? 'تم تحديث الخدمة بنجاح' : 'Service updated successfully');
     }
 
