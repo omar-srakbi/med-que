@@ -3,7 +3,7 @@
 A comprehensive clinic management system built with Laravel 12 for managing patients, tickets, medical records, and financial operations.
 
 ![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel)
-![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat&logo=php)
+![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?style=flat&logo=php)
 ![SQLite](https://img.shields.io/badge/Database-SQLite-003B57?style=flat&logo=sqlite)
 ![License](https://img.shields.io/badge/License-Proprietary-red?style=flat)
 
@@ -112,10 +112,10 @@ A comprehensive clinic management system built with Laravel 12 for managing pati
 ## 🛠️ Requirements
 
 ### Server Requirements:
-- **PHP:** 8.2 or higher
+- **PHP:** 8.4 or higher
 - **Database:** SQLite (default) or MySQL/PostgreSQL
 - **Web Server:** Apache/Nginx or PHP built-in server
-- **Extensions:** 
+- **Extensions:**
   - BCMath PHP Extension
   - Ctype PHP Extension
   - Fileinfo PHP Extension
@@ -202,6 +202,7 @@ Configure your local currency:
 | **Decimal Places** | 0, 1, 2, 3 | Number of decimals |
 
 **Examples:**
+- Syria: `SYP` / `SP` / `0`
 - Jordan: `JOD` / `JD` / `2`
 - USA: `USD` / `$` / `2`
 - Kuwait: `KWD` / `د.ك` / `3`
@@ -575,7 +576,7 @@ Built with:
 | Component | Version |
 |-----------|---------|
 | **Framework** | Laravel 12.x |
-| **PHP** | 8.2+ |
+| **PHP** | 8.4+ |
 | **Database** | SQLite |
 | **UI** | Bootstrap 5.3 |
 | **Charts** | Chart.js 4.4 |
