@@ -162,7 +162,66 @@
         </div>
 
         <!-- Pagination -->
-        {{ $logs->links() }}
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+            <div>
+                <small class="text-muted">
+                    {{ app()->getLocale() === 'ar' ? 'عرض' : 'Showing' }}
+                    <strong>{{ $logs->firstItem() ?? 0 }} - {{ $logs->lastItem() ?? 0 }}</strong>
+                    {{ app()->getLocale() === 'ar' ? 'من' : 'of' }} <strong>{{ $logs->total() }}</strong>
+                </small>
+            </div>
+            <div>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        {{-- Previous Button --}}
+                        @if ($logs->onFirstPage())
+                            <li class="page-item disabled" aria-disabled="true">
+                                <span class="page-link">{{ app()->getLocale() === 'ar' ? 'السابق' : 'Previous' }}</span>
+                            </li>
+                        @else
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $logs->previousPageUrl() }}&{{ http_build_query(request()->except('page')) }}" rel="prev">{{ app()->getLocale() === 'ar' ? 'السابق' : 'Previous' }}</a>
+                            </li>
+                        @endif
+
+                        {{-- Page Numbers --}}
+                        @foreach ($logs->getUrlRange(1, $logs->lastPage()) as $page => $url)
+                            @if ($page == $logs->currentPage())
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">{{ $page }}</span>
+                                </li>
+                            @else
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ $url }}&{{ http_build_query(request()->except('page')) }}">{{ $page }}</a>
+                                </li>
+                            @endif
+                        @endforeach
+
+                        {{-- Next Button --}}
+                        @if ($logs->hasMorePages())
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $logs->nextPageUrl() }}&{{ http_build_query(request()->except('page')) }}" rel="next">{{ app()->getLocale() === 'ar' ? 'التالي' : 'Next' }}</a>
+                            </li>
+                        @else
+                            <li class="page-item disabled" aria-disabled="true">
+                                <span class="page-link">{{ app()->getLocale() === 'ar' ? 'التالي' : 'Next' }}</span>
+                            </li>
+                        @endif
+                    </ul>
+                </nav>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+.pagination .page-link {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+</style>
 @endsection

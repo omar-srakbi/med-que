@@ -188,6 +188,13 @@
                             {{ app()->getLocale() === 'ar' ? 'الإعدادات' : 'Settings' }}
                         </a>
                     </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('settings.printing.*') ? 'active' : '' }}" href="{{ route('settings.printing.index') }}">
+                            <i class="bi bi-printer"></i>
+                            {{ app()->getLocale() === 'ar' ? 'إعدادات الطباعة' : 'Print Settings' }}
+                        </a>
+                    </li>
                     @endif
                     
                     @if(auth()->user()->role->name === 'Admin')

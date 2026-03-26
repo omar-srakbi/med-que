@@ -16,6 +16,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\AddAdminController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\IncompletePatientController;
+use App\Http\Controllers\PrintSettingsController;
 use App\Http\Controllers\Api\DepartmentServiceController;
 use App\Http\Controllers\Api\PatientSearchController;
 use Illuminate\Support\Facades\Route;
@@ -78,6 +79,17 @@ Route::middleware('auth')->group(function () {
     // Settings routes
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
+    
+    // Print Settings routes
+    Route::get('settings/printing', [PrintSettingsController::class, 'index'])->name('settings.printing.index');
+    Route::post('settings/printing', [PrintSettingsController::class, 'update'])->name('settings.printing.update');
+    Route::get('settings/printing/designer', [PrintSettingsController::class, 'designer'])->name('settings.printing.designer');
+    Route::post('settings/printing/save-layout', [PrintSettingsController::class, 'saveLayout'])->name('settings.printing.save-layout');
+    Route::post('settings/printing/template/{id}/default', [PrintSettingsController::class, 'setDefaultTemplate'])->name('settings.printing.template.default');
+    Route::delete('settings/printing/template/{id}', [PrintSettingsController::class, 'deleteTemplate'])->name('settings.printing.template.delete');
+    Route::get('settings/printing/preview', [PrintSettingsController::class, 'previewReceipt'])->name('settings.printing.preview');
+    Route::get('settings/printing/logs', [PrintSettingsController::class, 'printLogs'])->name('settings.printing.logs');
+    Route::get('settings/printing/logs/export', [PrintSettingsController::class, 'exportLogs'])->name('settings.printing.logs.export');
     
     // Audit Logs (Admin only)
     Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');

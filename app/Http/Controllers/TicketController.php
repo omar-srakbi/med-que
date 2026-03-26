@@ -188,7 +188,17 @@ class TicketController extends Controller
     public function receipt(Ticket $ticket)
     {
         $ticket->load(['patient', 'department', 'service', 'cashier', 'payment']);
-        return view('tickets.receipt', compact('ticket'));
+
+        // Get print settings
+        $settings = [];
+        foreach (\App\Models\PrintSetting::all() as $setting) {
+            $settings[$setting->setting_key] = $setting->setting_value;
+        }
+
+        // Log the print action
+        \App\Models\PrintLog::logPrint('receipt', $ticket, null, 1, 'success');
+
+        return view('tickets.receipt', compact('ticket', 'settings'));
     }
 
     public function call(Ticket $ticket)
