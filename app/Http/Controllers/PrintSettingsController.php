@@ -31,49 +31,23 @@ class PrintSettingsController extends Controller
 
     public function update(Request $request)
     {
-        // General Settings
+        // General Print Settings
         PrintSetting::set('print_mode', $request->print_mode ?? 'browser', 'string', 'general');
         PrintSetting::set('print_copies', (int) ($request->print_copies ?? 1), 'integer', 'general');
         PrintSetting::set('print_auto_print', $request->has('print_auto_print'), 'boolean', 'general');
-        
+
         // Custom paper size
         PrintSetting::set('print_custom_width', (int) ($request->print_custom_width ?? 80), 'integer', 'general');
         PrintSetting::set('print_custom_height', (int) ($request->print_custom_height ?? 200), 'integer', 'general');
-        
-        // Receipt Header
-        PrintSetting::set('receipt_show_header', $request->has('receipt_show_header'), 'boolean', 'receipt');
-        PrintSetting::set('receipt_show_logo', $request->has('receipt_show_logo'), 'boolean', 'receipt');
-        PrintSetting::set('receipt_show_clinic_name', $request->has('receipt_show_clinic_name'), 'boolean', 'receipt');
-        PrintSetting::set('receipt_show_phone', $request->has('receipt_show_phone'), 'boolean', 'receipt');
-        PrintSetting::set('receipt_custom_header', $request->receipt_custom_header ?? '', 'string', 'receipt');
-        
-        // Receipt Content
-        PrintSetting::set('receipt_show_patient', $request->has('receipt_show_patient'), 'boolean', 'receipt');
-        PrintSetting::set('receipt_show_cashier', $request->has('receipt_show_cashier'), 'boolean', 'receipt');
-        PrintSetting::set('receipt_show_ticket_number', $request->has('receipt_show_ticket_number'), 'boolean', 'receipt');
-        PrintSetting::set('receipt_show_queue_number', $request->has('receipt_show_queue_number'), 'boolean', 'receipt');
-        PrintSetting::set('receipt_show_visit_date', $request->has('receipt_show_visit_date'), 'boolean', 'receipt');
-        PrintSetting::set('receipt_show_service', $request->has('receipt_show_service'), 'boolean', 'receipt');
-        PrintSetting::set('receipt_show_price', $request->has('receipt_show_price'), 'boolean', 'receipt');
-        
-        // Receipt Footer
-        PrintSetting::set('receipt_show_thank_you', $request->has('receipt_show_thank_you'), 'boolean', 'receipt');
-        PrintSetting::set('receipt_thank_you_ar', $request->receipt_thank_you_ar ?? '', 'string', 'receipt');
-        PrintSetting::set('receipt_thank_you_en', $request->receipt_thank_you_en ?? '', 'string', 'receipt');
-        
-        // QR Code
-        PrintSetting::set('qr_code_enabled', $request->has('qr_code_enabled'), 'boolean', 'receipt');
-        PrintSetting::set('qr_code_position', $request->qr_code_position ?? 'bottom', 'string', 'receipt');
-        
-        // Barcode
-        PrintSetting::set('barcode_enabled', $request->has('barcode_enabled'), 'boolean', 'receipt');
-        
-        // Handle logo upload
-        if ($request->hasFile('receipt_logo')) {
-            $path = $request->file('receipt_logo')->store('logos', 'public');
-            PrintSetting::set('receipt_logo_path', $path, 'string', 'receipt');
-        }
-        
+
+        // Paper defaults for designer
+        PrintSetting::set('paper_width', (int) ($request->paper_width ?? 80), 'integer', 'general');
+        PrintSetting::set('paper_height', (int) ($request->paper_height ?? 100), 'integer', 'general');
+
+        // Advanced settings
+        PrintSetting::set('system_printer', $request->system_printer ?? 'default', 'string', 'general');
+        PrintSetting::set('print_silent_mode', $request->has('print_silent_mode'), 'boolean', 'general');
+
         return back()->with('success', __('Print settings saved successfully!'));
     }
 
@@ -104,18 +78,38 @@ class PrintSettingsController extends Controller
         $ticket = \App\Models\Ticket::with(['patient', 'department', 'service', 'cashier', 'payment'])
             ->latest()
             ->first();
-        
+
         if (!$ticket) {
             return back()->withErrors(['error' => __('No tickets available for preview')]);
         }
-        
+
         // Get print settings
         $settings = [];
         foreach (\App\Models\PrintSetting::all() as $setting) {
             $settings[$setting->setting_key] = $setting->setting_value;
         }
-        
+
         return view('tickets.receipt-preview', compact('ticket', 'settings'));
+    }
+
+    public function previewAjax(Request $request)
+    {
+        // Get a sample ticket for preview
+        $ticket = \App\Models\Ticket::with(['patient', 'department', 'service', 'cashier', 'payment'])
+            ->latest()
+            ->first();
+
+        if (!$ticket) {
+            return response()->json(['html' => '<div class="text-center text-muted py-5"><p>No tickets available for preview</p></div>']);
+        }
+
+        // Use submitted settings
+        $settings = $request->all();
+
+        // Render preview HTML
+        $html = view('tickets.receipt-partial', compact('ticket', 'settings'))->render();
+
+        return response()->json(['html' => $html]);
     }
 
     public function designer()

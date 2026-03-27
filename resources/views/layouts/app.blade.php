@@ -139,7 +139,7 @@
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('patients.incomplete') ? 'active' : '' }}" href="{{ route('patients.incomplete') }}">
                             <i class="bi bi-exclamation-triangle text-warning"></i>
-                            {{ app()->getLocale() === 'ar' ? 'الملفات غير المكتملة' : 'Incomplete Profiles' }}
+                            {{ app()->getLocale() === 'ar' ? 'اكمال بيانات المرضى' : 'Incomplete Profiles' }}
                         </a>
                     </li>
                     @endif
@@ -193,6 +193,13 @@
                         <a class="nav-link {{ request()->routeIs('settings.printing.*') ? 'active' : '' }}" href="{{ route('settings.printing.index') }}">
                             <i class="bi bi-printer"></i>
                             {{ app()->getLocale() === 'ar' ? 'إعدادات الطباعة' : 'Print Settings' }}
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('settings.printing.reports.*') ? 'active' : '' }}" href="{{ route('settings.printing.reports.index') }}">
+                            <i class="bi bi-file-earmark-bar-graph"></i>
+                            {{ app()->getLocale() === 'ar' ? 'إعدادات التقارير' : 'Reports Settings' }}
                         </a>
                     </li>
                     @endif

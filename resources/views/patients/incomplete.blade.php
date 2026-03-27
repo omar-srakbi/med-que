@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', app()->getLocale() === 'ar' ? 'الملفات غير المكتملة' : 'Incomplete Profiles')
-@section('page-title', app()->getLocale() === 'ar' ? 'الملفات غير المكتملة' : 'Incomplete Profiles')
+@section('title', app()->getLocale() === 'ar' ? 'الملفات الشخصية غير المكتملة' : 'Incomplete Profiles')
+@section('page-title', app()->getLocale() === 'ar' ? 'الملفات الشخصية غير المكتملة' : 'Incomplete Profiles')
 
 @section('content')
 <div class="card">
@@ -10,13 +10,6 @@
         <span class="badge bg-warning">{{ $patients->total() }} {{ app()->getLocale() === 'ar' ? 'مريض' : 'patients' }}</span>
     </div>
     <div class="card-body">
-        @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="bi bi-check-circle"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        @endif
-
         <div class="alert alert-info">
             <i class="bi bi-info-circle"></i>
             {{ app()->getLocale() === 'ar' ? 'هؤلاء المرضى تم إنشاؤهم بمعلومات قليلة أثناء ساعات الذروة. يرجى إكمال معلوماتهم.' : 'These patients were created with minimal information during rush hours. Please complete their information.' }}

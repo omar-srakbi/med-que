@@ -14,15 +14,21 @@
             @csrf
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">{{ app()->getLocale() === 'ar' ? 'الاسم الأول' : 'First Name' }}</label>
-                    <input type="text" class="form-control" value="{{ $patient->first_name }}" disabled>
-                    <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'لا يمكن تغييره' : 'Cannot be changed' }}</small>
+                    <label for="first_name" class="form-label">{{ app()->getLocale() === 'ar' ? 'الاسم الأول' : 'First Name' }} <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control @error('first_name') is-invalid @enderror"
+                           id="first_name" name="first_name" value="{{ old('first_name', $patient->first_name) }}" required>
+                    @error('first_name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
-                
+
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">{{ app()->getLocale() === 'ar' ? 'اسم العائلة' : 'Last Name' }}</label>
-                    <input type="text" class="form-control" value="{{ $patient->last_name }}" disabled>
-                    <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'لا يمكن تغييره' : 'Cannot be changed' }}</small>
+                    <label for="last_name" class="form-label">{{ app()->getLocale() === 'ar' ? 'اسم العائلة' : 'Last Name' }} <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control @error('last_name') is-invalid @enderror"
+                           id="last_name" name="last_name" value="{{ old('last_name', $patient->last_name) }}" required>
+                    @error('last_name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
             

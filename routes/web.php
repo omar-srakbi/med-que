@@ -19,6 +19,7 @@ use App\Http\Controllers\IncompletePatientController;
 use App\Http\Controllers\PrintSettingsController;
 use App\Http\Controllers\Api\DepartmentServiceController;
 use App\Http\Controllers\Api\PatientSearchController;
+use App\Http\Controllers\ReportSettingsController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes
@@ -44,10 +45,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/patients/search-or-create', [PatientSearchController::class, 'searchOrCreate']);
     
     // Patient routes
-    Route::resource('patients', PatientController::class);
     Route::get('patients/incomplete', [IncompletePatientController::class, 'index'])->name('patients.incomplete');
     Route::get('patients/{patient}/complete', [IncompletePatientController::class, 'complete'])->name('patients.complete');
     Route::post('patients/{patient}/complete', [IncompletePatientController::class, 'update']);
+    Route::resource('patients', PatientController::class);
     
     // Staff routes (admin only)
     Route::resource('staff', StaffController::class)->middleware('role:Admin');
@@ -88,8 +89,13 @@ Route::middleware('auth')->group(function () {
     Route::post('settings/printing/template/{id}/default', [PrintSettingsController::class, 'setDefaultTemplate'])->name('settings.printing.template.default');
     Route::delete('settings/printing/template/{id}', [PrintSettingsController::class, 'deleteTemplate'])->name('settings.printing.template.delete');
     Route::get('settings/printing/preview', [PrintSettingsController::class, 'previewReceipt'])->name('settings.printing.preview');
+    Route::post('settings/printing/preview', [PrintSettingsController::class, 'previewAjax'])->name('settings.printing.preview.ajax');
     Route::get('settings/printing/logs', [PrintSettingsController::class, 'printLogs'])->name('settings.printing.logs');
     Route::get('settings/printing/logs/export', [PrintSettingsController::class, 'exportLogs'])->name('settings.printing.logs.export');
+    Route::get('settings/printing/reports', [ReportSettingsController::class, 'index'])->name('settings.printing.reports.index');
+    Route::post('settings/printing/reports', [ReportSettingsController::class, 'update'])->name('settings.printing.reports.update');
+    Route::post('settings/printing/reports/preview', [ReportSettingsController::class, 'previewAjax'])->name('settings.printing.reports.preview.ajax');
+    Route::post('settings/printing/reports/export', [ReportSettingsController::class, 'export'])->name('settings.printing.reports.export');
     
     // Audit Logs (Admin only)
     Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');

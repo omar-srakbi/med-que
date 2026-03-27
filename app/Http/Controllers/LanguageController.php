@@ -8,14 +8,25 @@ use Illuminate\Support\Facades\Session;
 
 class LanguageController extends Controller
 {
-    public function switch()
+    public function switch(Request $request)
     {
         $currentLocale = Session::get('locale', 'ar');
         $newLocale = $currentLocale === 'ar' ? 'en' : 'ar';
-        
+
         Session::put('locale', $newLocale);
         App::setLocale($newLocale);
+
+        // Get the previous URL, but avoid redirecting to language switch itself
+        $previousUrl = $request->headers->get('referer');
         
-        return back();
+        // If no referer or it's the language switch, redirect based on auth status
+        if (!$previousUrl || str_contains($previousUrl, '/language/switch')) {
+            if ($request->user()) {
+                return redirect()->route('dashboard');
+            }
+            return redirect()->route('login');
+        }
+
+        return redirect($previousUrl);
     }
 }

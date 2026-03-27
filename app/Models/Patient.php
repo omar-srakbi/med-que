@@ -77,11 +77,31 @@ class Patient extends Model
         return $this->is_profile_complete;
     }
 
+    public function hasCompleteInfo(): bool
+    {
+        // Check if all required fields are filled
+        return !empty($this->father_name) 
+            && !empty($this->mother_name) 
+            && !empty($this->birth_date) 
+            && !empty($this->birth_place) 
+            && !empty($this->national_id) 
+            && !empty($this->phone);
+    }
+
     public function markComplete(): void
     {
         $this->update([
             'is_profile_complete' => true,
             'completed_at' => now(),
         ]);
+    }
+
+    public function markCompleteIfComplete(): bool
+    {
+        if ($this->hasCompleteInfo() && !$this->is_profile_complete) {
+            $this->markComplete();
+            return true;
+        }
+        return false;
     }
 }
