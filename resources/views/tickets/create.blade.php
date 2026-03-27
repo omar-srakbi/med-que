@@ -38,23 +38,17 @@
                     <div class="mb-3">
                         <label for="patient_search" class="form-label">{{ app()->getLocale() === 'ar' ? 'المريض' : 'Patient' }} <span class="text-danger">*</span></label>
                         <div class="position-relative">
-                            <input type="text" class="form-control @error('patient_id') is-invalid @enderror" 
-                                   id="patient_search" 
-                                   list="patient_list"
+                            <input type="text" class="form-control @error('patient_id') is-invalid @enderror"
+                                   id="patient_search"
                                    placeholder="{{ app()->getLocale() === 'ar' ? 'اكتب الاسم أو اختر من القائمة...' : 'Type name or select from list...' }}"
                                    autocomplete="off"
                                    value="{{ old('patient_name') }}"
                                    required>
-                            <datalist id="patient_list">
-                                @foreach($patients ?? [] as $patient)
-                                <option value="{{ $patient->full_name }}" data-id="{{ $patient->id }}" data-national-id="{{ $patient->national_id }}">
-                                @endforeach
-                            </datalist>
-                            <i class="bi bi-search position-absolute" style="right: 10px; top: 50%; transform: translateY(-50%); color: #999;"></i>
+                            <i class="bi bi-person-badge position-absolute" style="{{ app()->getLocale() === 'ar' ? 'left' : 'right' }}: 10px; top: 50%; transform: translateY(-50%); color: #6c757d;"></i>
+                            <div id="patient_results" class="position-absolute w-100 shadow-lg border-0 rounded" style="z-index: 9999; display: none; max-height: 350px; overflow-y: auto; background: white;"></div>
                         </div>
                         <input type="hidden" name="patient_id" id="patient_id" value="{{ old('patient_id') }}">
                         <input type="hidden" name="is_new_patient" id="is_new_patient" value="0">
-                        <div id="patient_results" class="list-group position-absolute w-100 shadow border" style="z-index: 1000; display: none; max-height: 300px; overflow-y: auto;"></div>
                         @error('patient_id')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror

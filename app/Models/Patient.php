@@ -27,6 +27,10 @@ class Patient extends Model
         'completed_at',
     ];
 
+    protected $appends = [
+        'full_name',
+    ];
+
     protected function casts(): array
     {
         return [
