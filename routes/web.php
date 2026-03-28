@@ -20,6 +20,8 @@ use App\Http\Controllers\PrintSettingsController;
 use App\Http\Controllers\Api\DepartmentServiceController;
 use App\Http\Controllers\Api\PatientSearchController;
 use App\Http\Controllers\ReportSettingsController;
+use App\Http\Controllers\ReportBuilderController;
+use App\Http\Controllers\ReportExportController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes
@@ -84,6 +86,8 @@ Route::middleware('auth')->group(function () {
     // Print Settings routes
     Route::get('settings/printing', [PrintSettingsController::class, 'index'])->name('settings.printing.index');
     Route::post('settings/printing', [PrintSettingsController::class, 'update'])->name('settings.printing.update');
+    Route::post('settings/printing/receipt', [PrintSettingsController::class, 'updateReceipt'])->name('settings.printing.updateReceipt');
+    Route::post('settings/printing/report', [PrintSettingsController::class, 'updateReport'])->name('settings.printing.updateReport');
     Route::get('settings/printing/designer', [PrintSettingsController::class, 'designer'])->name('settings.printing.designer');
     Route::post('settings/printing/save-layout', [PrintSettingsController::class, 'saveLayout'])->name('settings.printing.save-layout');
     Route::post('settings/printing/template/{id}/default', [PrintSettingsController::class, 'setDefaultTemplate'])->name('settings.printing.template.default');
@@ -92,6 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::post('settings/printing/preview', [PrintSettingsController::class, 'previewAjax'])->name('settings.printing.preview.ajax');
     Route::get('settings/printing/logs', [PrintSettingsController::class, 'printLogs'])->name('settings.printing.logs');
     Route::get('settings/printing/logs/export', [PrintSettingsController::class, 'exportLogs'])->name('settings.printing.logs.export');
+    Route::get('api/print-settings/{type}', [PrintSettingsController::class, 'getSettings'])->name('api.print-settings.get');
     Route::get('settings/printing/reports', [ReportSettingsController::class, 'index'])->name('settings.printing.reports.index');
     Route::post('settings/printing/reports', [ReportSettingsController::class, 'update'])->name('settings.printing.reports.update');
     Route::post('settings/printing/reports/preview', [ReportSettingsController::class, 'previewAjax'])->name('settings.printing.reports.preview.ajax');
@@ -106,6 +111,27 @@ Route::middleware('auth')->group(function () {
     Route::get('reports/daily-patients', [ReportController::class, 'dailyPatients'])->name('reports.daily-patients');
     Route::get('reports/daily-revenue', [ReportController::class, 'dailyRevenue'])->name('reports.daily-revenue');
     Route::get('reports/patient-history', [ReportController::class, 'patientHistory'])->name('reports.patient-history');
+    Route::get('reports/monthly-revenue', [ReportController::class, 'monthlyRevenue'])->name('reports.monthly-revenue');
+    Route::get('reports/department-performance', [ReportController::class, 'departmentPerformance'])->name('reports.department-performance');
+    Route::get('reports/cashier-performance', [ReportController::class, 'cashierPerformance'])->name('reports.cashier-performance');
+    Route::get('reports/services', [ReportController::class, 'services'])->name('reports.services');
+    Route::get('reports/patient-demographics', [ReportController::class, 'patientDemographics'])->name('reports.patient-demographics');
+    Route::get('reports/visit-frequency', [ReportController::class, 'visitFrequency'])->name('reports.visit-frequency');
+    
+    // Report exports
+    Route::get('reports/export/pdf/{type}', [ReportExportController::class, 'exportPdf'])->name('reports.export.pdf');
+    Route::get('reports/export/excel/{type}', [ReportExportController::class, 'exportExcel'])->name('reports.export.excel');
+    Route::get('reports/export/csv/{type}', [ReportExportController::class, 'exportCsv'])->name('reports.export.csv');
+    
+    // Report builder
+    Route::get('reports/builder', [ReportBuilderController::class, 'index'])->name('reports.builder.index');
+    Route::get('reports/builder/create', [ReportBuilderController::class, 'create'])->name('reports.builder.create');
+    Route::post('reports/builder', [ReportBuilderController::class, 'store'])->name('reports.builder.store');
+    Route::get('reports/builder/{report}/edit', [ReportBuilderController::class, 'edit'])->name('reports.builder.edit');
+    Route::put('reports/builder/{report}', [ReportBuilderController::class, 'update'])->name('reports.builder.update');
+    Route::delete('reports/builder/{report}', [ReportBuilderController::class, 'destroy'])->name('reports.builder.destroy');
+    Route::post('reports/builder/preview', [ReportBuilderController::class, 'preview'])->name('reports.builder.preview');
+    Route::get('reports/builder/{report}/show', [ReportBuilderController::class, 'show'])->name('reports.builder.show');
     
     // Search
     Route::get('search', [SearchController::class, 'search'])->name('search');

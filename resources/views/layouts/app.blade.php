@@ -180,6 +180,13 @@
                             {{ app()->getLocale() === 'ar' ? 'التقارير' : 'Reports' }}
                         </a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('reports.builder.*') ? 'active' : '' }}" href="{{ route('reports.builder.index') }}">
+                            <i class="bi bi-tools text-warning"></i>
+                            {{ app()->getLocale() === 'ar' ? 'منشئ التقارير' : 'Report Builder' }}
+                        </a>
+                    </li>
                     
                     @if(auth()->user()->hasPermission('manage_settings'))
                     <li class="nav-item">

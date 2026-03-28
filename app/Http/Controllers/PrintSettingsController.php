@@ -12,43 +12,80 @@ class PrintSettingsController extends Controller
 {
     public function index()
     {
-        $settings = [];
-        foreach (PrintSetting::all() as $setting) {
-            $settings[$setting->setting_key] = $setting->setting_value;
+        // Get receipt settings
+        $receiptSettings = [];
+        foreach (PrintSetting::where('category', 'receipt')->get() as $setting) {
+            $receiptSettings[$setting->setting_key] = $setting->setting_value;
         }
-        
+
+        // Get report settings
+        $reportSettings = [];
+        foreach (PrintSetting::where('category', 'report')->get() as $setting) {
+            $reportSettings[$setting->setting_key] = $setting->setting_value;
+        }
+
         $templates = PrintTemplate::where('template_type', 'receipt')
             ->orderBy('is_default', 'desc')
             ->get();
-        
+
         $printLogs = PrintLog::with('user')
             ->latest()
             ->limit(20)
             ->get();
-        
-        return view('settings.printing.index', compact('settings', 'templates', 'printLogs'));
+
+        return view('settings.printing.index', compact('receiptSettings', 'reportSettings', 'templates', 'printLogs'));
     }
 
     public function update(Request $request)
     {
-        // General Print Settings
-        PrintSetting::set('print_mode', $request->print_mode ?? 'browser', 'string', 'general');
-        PrintSetting::set('print_copies', (int) ($request->print_copies ?? 1), 'integer', 'general');
-        PrintSetting::set('print_auto_print', $request->has('print_auto_print'), 'boolean', 'general');
+        // Keep old method for backwards compatibility
+        return $this->updateReceipt($request);
+    }
 
-        // Custom paper size
-        PrintSetting::set('print_custom_width', (int) ($request->print_custom_width ?? 80), 'integer', 'general');
-        PrintSetting::set('print_custom_height', (int) ($request->print_custom_height ?? 200), 'integer', 'general');
+    public function updateReceipt(Request $request)
+    {
+        // Receipt Print Settings
+        PrintSetting::set('receipt_print_mode', $request->receipt_print_mode ?? 'browser', 'string', 'receipt');
+        PrintSetting::set('receipt_printer_name', $request->receipt_printer_name ?? 'default', 'string', 'receipt');
+        PrintSetting::set('receipt_copies', (int) ($request->receipt_copies ?? 1), 'integer', 'receipt');
+        PrintSetting::set('receipt_auto_print', $request->has('receipt_auto_print'), 'boolean', 'receipt');
 
-        // Paper defaults for designer
-        PrintSetting::set('paper_width', (int) ($request->paper_width ?? 80), 'integer', 'general');
-        PrintSetting::set('paper_height', (int) ($request->paper_height ?? 100), 'integer', 'general');
+        // Custom paper size for receipts
+        PrintSetting::set('receipt_custom_width', (int) ($request->receipt_custom_width ?? 80), 'integer', 'receipt');
+        PrintSetting::set('receipt_custom_height', (int) ($request->receipt_custom_height ?? 200), 'integer', 'receipt');
 
-        // Advanced settings
-        PrintSetting::set('system_printer', $request->system_printer ?? 'default', 'string', 'general');
-        PrintSetting::set('print_silent_mode', $request->has('print_silent_mode'), 'boolean', 'general');
+        return back()->with('success', __('Receipt print settings saved successfully!'));
+    }
 
-        return back()->with('success', __('Print settings saved successfully!'));
+    public function updateReport(Request $request)
+    {
+        // Report Print Settings
+        PrintSetting::set('report_print_mode', $request->report_print_mode ?? 'browser', 'string', 'report');
+        PrintSetting::set('report_printer_name', $request->report_printer_name ?? 'default', 'string', 'report');
+        PrintSetting::set('report_paper_size', $request->report_paper_size ?? 'A4', 'string', 'report');
+        PrintSetting::set('report_orientation', $request->report_orientation ?? 'portrait', 'string', 'report');
+        PrintSetting::set('report_copies', (int) ($request->report_copies ?? 1), 'integer', 'report');
+        PrintSetting::set('report_auto_print', $request->has('report_auto_print'), 'boolean', 'report');
+        PrintSetting::set('report_show_header', $request->has('report_show_header'), 'boolean', 'report');
+        PrintSetting::set('report_show_footer', $request->has('report_show_footer'), 'boolean', 'report');
+
+        // Custom paper size for reports
+        PrintSetting::set('report_custom_width', (int) ($request->report_custom_width ?? 210), 'integer', 'report');
+        PrintSetting::set('report_custom_height', (int) ($request->report_custom_height ?? 297), 'integer', 'report');
+
+        return back()->with('success', __('Report print settings saved successfully!'));
+    }
+
+    public function getSettings($type)
+    {
+        $settings = [];
+        $category = $type === 'receipt' ? 'receipt' : 'report';
+        
+        foreach (PrintSetting::where('category', $category)->get() as $setting) {
+            $settings[$setting->setting_key] = $setting->setting_value;
+        }
+
+        return response()->json($settings);
     }
 
     public function setDefaultTemplate($id)

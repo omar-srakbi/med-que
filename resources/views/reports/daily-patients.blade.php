@@ -7,9 +7,14 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-people"></i> {{ app()->getLocale() === 'ar' ? 'تقرير المرضى اليومي' : 'Daily Patients Report' }}</span>
-        <a href="{{ route('reports.index') }}" class="btn btn-sm btn-secondary">
-            <i class="bi bi-arrow-left"></i> {{ app()->getLocale() === 'ar' ? 'رجوع' : 'Back' }}
-        </a>
+        <div class="d-flex gap-2">
+            <button onclick="printReport()" class="btn btn-sm btn-success">
+                <i class="bi bi-printer"></i> {{ app()->getLocale() === 'ar' ? 'طباعة' : 'Print' }}
+            </button>
+            <a href="{{ route('reports.index') }}" class="btn btn-sm btn-secondary">
+                <i class="bi bi-arrow-left"></i> {{ app()->getLocale() === 'ar' ? 'رجوع' : 'Back' }}
+            </a>
+        </div>
     </div>
     <div class="card-body">
         <!-- Date Filter -->
@@ -95,3 +100,84 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .card, .card * {
+        visibility: visible;
+    }
+    .card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .btn, .form-control, .nav-link, .sidebar, .dropdown {
+        display: none !important;
+    }
+    @page {
+        size: A4;
+        margin: 10mm;
+    }
+    body.report-landscape {
+        @page {
+            size: A4 landscape;
+        }
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+let reportSettings = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetch("{{ route('api.print-settings.get', 'report') }}")
+        .then(response => response.json())
+        .then(settings => {
+            reportSettings = settings;
+        })
+        .catch(err => console.error('Error loading report settings:', err));
+});
+
+function printReport() {
+    if (!reportSettings) {
+        alert('{{ app()->getLocale() === 'ar' ? 'جاري تحميل إعدادات الطباعة...' : 'Loading print settings...' }}');
+        return;
+    }
+
+    const orientation = reportSettings.report_orientation || 'portrait';
+    if (orientation === 'landscape') {
+        document.body.classList.add('report-landscape');
+    }
+
+    const paperSize = reportSettings.report_paper_size || 'A4';
+    const printMode = reportSettings.report_print_mode || 'browser';
+    
+    if (printMode === 'system') {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Report</title>
+                <style>@page { size: ${paperSize} ${orientation}; margin: 10mm; } body { font-family: Arial, sans-serif; margin: 0; padding: 10mm; }</style>
+            </head>
+            <body>${document.querySelector('.card').innerHTML}<script>setTimeout(function() { window.print(); }, 500);<\/script></body>
+            </html>
+        `);
+        printWindow.document.close();
+    } else {
+        window.print();
+    }
+
+    setTimeout(() => {
+        document.body.classList.remove('report-landscape');
+    }, 1000);
+}
+</script>
+@endpush

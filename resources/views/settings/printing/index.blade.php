@@ -15,210 +15,257 @@
     </div>
 </div>
 
-<form action="{{ route('settings.printing.update') }}" method="POST" enctype="multipart/form-data" id="printSettingsForm">
-    @csrf
+<!-- Tabs Navigation -->
+<ul class="nav nav-tabs mb-3" id="printSettingsTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="receipt-tab" data-bs-toggle="tab" data-bs-target="#receipt" type="button" role="tab">
+            <i class="bi bi-ticket-perforated"></i> {{ app()->getLocale() === 'ar' ? 'إعدادات الإيصالات' : 'Receipt Settings' }}
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report" type="button" role="tab">
+            <i class="bi bi-file-earmark-bar-graph"></i> {{ app()->getLocale() === 'ar' ? 'إعدادات التقارير' : 'Report Settings' }}
+        </button>
+    </li>
+</ul>
 
-    <div class="row g-4">
-        <!-- Settings Column -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-sliders"></i> {{ app()->getLocale() === 'ar' ? 'إعدادات الطابعة' : 'Printer Configuration' }}</h5>
+<!-- Tab Content -->
+<div class="tab-content" id="printSettingsTabsContent">
+
+    <!-- Receipt Settings Tab -->
+    <div class="tab-pane fade show active" id="receipt" role="tabpanel">
+        <form action="{{ route('settings.printing.updateReceipt') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-ticket-perforated"></i> {{ app()->getLocale() === 'ar' ? 'إعدادات طباعة الإيصالات' : 'Receipt Print Settings' }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ app()->getLocale() === 'ar' ? 'الطابعة' : 'Printer' }}</label>
+                                <select class="form-select" name="receipt_printer_name">
+                                    <option value="default">{{ app()->getLocale() === 'ar' ? 'الطابعة الافتراضية' : 'Default Printer' }}</option>
+                                    <option value="thermal" {{ ($receiptSettings['receipt_printer_name'] ?? '') == 'thermal' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'طابعة حرارية' : 'Thermal Printer' }}</option>
+                                    <option value="pos" {{ ($receiptSettings['receipt_printer_name'] ?? '') == 'pos' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'طابعة نقاط بيع' : 'POS Printer' }}</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ app()->getLocale() === 'ar' ? 'نوع الطباعة' : 'Print Mode' }}</label>
+                                <select class="form-select" name="receipt_print_mode" id="receipt_print_mode">
+                                    <option value="browser" {{ ($receiptSettings['receipt_print_mode'] ?? 'browser') == 'browser' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'متصفح (تلقائي)' : 'Browser (Auto)' }}</option>
+                                    <option value="system" {{ ($receiptSettings['receipt_print_mode'] ?? 'browser') == 'system' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'مدير الطباعة (Windows)' : 'Print Manager (Windows)' }}</option>
+                                    <option value="custom" {{ ($receiptSettings['receipt_print_mode'] ?? 'browser') == 'custom' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'مقاس مخصص' : 'Custom Size' }}</option>
+                                </select>
+                            </div>
+
+                            <div id="receipt_custom_size_fields" class="row" style="display: none;">
+                                <div class="col-6">
+                                    <label class="form-label">{{ app()->getLocale() === 'ar' ? 'العرض (مم)' : 'Width (mm)' }}</label>
+                                    <input type="number" class="form-control" name="receipt_custom_width" value="{{ $receiptSettings['receipt_custom_width'] ?? 80 }}" min="50" max="210">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">{{ app()->getLocale() === 'ar' ? 'الطول (مم)' : 'Height (mm)' }}</label>
+                                    <input type="number" class="form-control" name="receipt_custom_height" value="{{ $receiptSettings['receipt_custom_height'] ?? 200 }}" min="100" max="350">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label fw-bold">{{ app()->getLocale() === 'ar' ? 'عدد النسخ' : 'Copies' }}</label>
+                                    <input type="number" class="form-control" name="receipt_copies" value="{{ $receiptSettings['receipt_copies'] ?? 1 }}" min="1" max="10">
+                                </div>
+                                <div class="col-6 d-flex align-items-end">
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" name="receipt_auto_print" value="1" {{ ($receiptSettings['receipt_auto_print'] ?? false) ? 'checked' : '' }}>
+                                        <label class="form-check-label">{{ app()->getLocale() === 'ar' ? 'طباعة تلقائية' : 'Auto-Print' }}</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-3">
+                        <i class="bi bi-save"></i> {{ app()->getLocale() === 'ar' ? 'حفظ إعدادات الإيصالات' : 'Save Receipt Settings' }}
+                    </button>
                 </div>
-                <div class="card-body p-0">
-                    <div class="accordion accordion-flush" id="settingsAccordion">
-                        
-                        <!-- Printer Configuration -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#printerSettings">
-                                    <i class="bi bi-printer me-2"></i> {{ app()->getLocale() === 'ar' ? 'إعدادات الطابعة' : 'Printer Settings' }}
-                                </button>
-                            </h2>
-                            <div id="printerSettings" class="accordion-collapse collapse show" data-bs-parent="#settingsAccordion">
-                                <div class="accordion-body">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">{{ app()->getLocale() === 'ar' ? 'نوع الطباعة' : 'Print Mode' }}</label>
-                                        <select class="form-select" name="print_mode" id="print_mode">
-                                            <option value="browser" {{ ($settings['print_mode'] ?? 'browser') == 'browser' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'متصفح (تلقائي)' : 'Browser (Auto)' }}</option>
-                                            <option value="system" {{ ($settings['print_mode'] ?? 'browser') == 'system' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'مدير الطباعة (Windows)' : 'Print Manager (Windows)' }}</option>
-                                            <option value="custom" {{ ($settings['print_mode'] ?? 'browser') == 'custom' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'مقاس مخصص' : 'Custom Size' }}</option>
-                                        </select>
-                                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'System يفتح نافذة الطباعة، Custom للمقاسات الخاصة' : 'System opens print dialog, Custom for special sizes' }}</small>
-                                    </div>
 
-                                    <div id="custom_size_fields" class="row" style="display: none;">
-                                        <div class="col-6">
-                                            <label class="form-label">{{ app()->getLocale() === 'ar' ? 'العرض (مم)' : 'Width (mm)' }}</label>
-                                            <input type="number" class="form-control" name="print_custom_width" value="{{ $settings['print_custom_width'] ?? 80 }}" min="50" max="210">
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label">{{ app()->getLocale() === 'ar' ? 'الطول (مم)' : 'Height (mm)' }}</label>
-                                            <input type="number" class="form-control" name="print_custom_height" value="{{ $settings['print_custom_height'] ?? 200 }}" min="100" max="350">
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <label class="form-label fw-bold">{{ app()->getLocale() === 'ar' ? 'عدد النسخ' : 'Copies' }}</label>
-                                            <input type="number" class="form-control" name="print_copies" value="{{ $settings['print_copies'] ?? 1 }}" min="1" max="10">
-                                        </div>
-                                        <div class="col-6 d-flex align-items-end">
-                                            <div class="form-check form-switch mb-3">
-                                                <input class="form-check-input" type="checkbox" name="print_auto_print" value="1" {{ ($settings['print_auto_print'] ?? false) ? 'checked' : '' }}>
-                                                <label class="form-check-label">{{ app()->getLocale() === 'ar' ? 'طباعة تلقائية' : 'Auto-Print' }}</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="col-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="bi bi-lightbulb"></i> {{ app()->getLocale() === 'ar' ? 'معلومات سريعة' : 'Quick Info' }}</h6>
                         </div>
-
-                        <!-- Paper Settings -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#paperSettings">
-                                    <i class="bi bi-file-earmark me-2"></i> {{ app()->getLocale() === 'ar' ? 'إعدادات الورق' : 'Paper Settings' }}
-                                </button>
-                            </h2>
-                            <div id="paperSettings" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
-                                <div class="accordion-body">
-                                    <div class="alert alert-info mb-3">
-                                        <i class="bi bi-info-circle"></i> {{ app()->getLocale() === 'ar' ? 'لتصميم شكل الإيصال وترتيب العناصر، استخدم' : 'To design receipt layout and arrange elements, use' }}
-                                        <a href="{{ route('settings.printing.designer') }}" class="alert-link" target="_blank">
-                                            <i class="bi bi-palette"></i> {{ app()->getLocale() === 'ar' ? 'مصمم الإيصال' : 'Receipt Designer' }}
-                                        </a>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <label class="form-label">{{ app()->getLocale() === 'ar' ? 'العرض الافتراضي (مم)' : 'Default Width (mm)' }}</label>
-                                            <input type="number" class="form-control" name="paper_width" value="{{ $settings['paper_width'] ?? 80 }}" min="50" max="210">
-                                            <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'يستخدم في المصمم' : 'Used in designer' }}</small>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label">{{ app()->getLocale() === 'ar' ? 'الطول الافتراضي (مم)' : 'Default Height (mm)' }}</label>
-                                            <input type="number" class="form-control" name="paper_height" value="{{ $settings['paper_height'] ?? 100 }}" min="50" max="350">
-                                            <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'يستخدم في المصمم' : 'Used in designer' }}</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="card-body">
+                            <h6>{{ app()->getLocale() === 'ar' ? 'الإعدادات الحالية' : 'Current Settings' }}</h6>
+                            <ul class="small mb-0">
+                                <li><strong>{{ app()->getLocale() === 'ar' ? 'الطابعة' : 'Printer' }}:</strong> {{ ($receiptSettings['receipt_printer_name'] ?? 'default') == 'default' ? (app()->getLocale() === 'ar' ? 'الافتراضية' : 'Default') : (($receiptSettings['receipt_printer_name'] ?? '') == 'thermal' ? (app()->getLocale() === 'ar' ? 'حرارية' : 'Thermal') : 'POS') }}</li>
+                                <li><strong>{{ app()->getLocale() === 'ar' ? 'الحجم' : 'Size' }}:</strong> {{ $receiptSettings['receipt_custom_width'] ?? 80 }}mm × {{ $receiptSettings['receipt_custom_height'] ?? 200 }}mm</li>
+                                <li><strong>{{ app()->getLocale() === 'ar' ? 'النسخ' : 'Copies' }}:</strong> {{ $receiptSettings['receipt_copies'] ?? 1 }}</li>
+                                <li><strong>{{ app()->getLocale() === 'ar' ? 'تلقائي' : 'Auto' }}:</strong> {{ ($receiptSettings['receipt_auto_print'] ?? false) ? (app()->getLocale() === 'ar' ? 'نعم' : 'Yes') : (app()->getLocale() === 'ar' ? 'لا' : 'No') }}</li>
+                            </ul>
                         </div>
-
-                        <!-- Advanced Settings -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#advancedSettings">
-                                    <i class="bi bi-gear me-2"></i> {{ app()->getLocale() === 'ar' ? 'إعدادات متقدمة' : 'Advanced Settings' }}
-                                </button>
-                            </h2>
-                            <div id="advancedSettings" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
-                                <div class="accordion-body">
-                                    <div class="mb-3">
-                                        <label class="form-label">{{ app()->getLocale() === 'ar' ? 'طابعة النظام' : 'System Printer' }}</label>
-                                        <select class="form-select" name="system_printer">
-                                            <option value="default">{{ app()->getLocale() === 'ar' ? 'الطابعة الافتراضية' : 'Default Printer' }}</option>
-                                            <option value="thermal" {{ ($settings['system_printer'] ?? 'default') == 'thermal' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'طابعة حرارية' : 'Thermal Printer' }}</option>
-                                            <option value="laser" {{ ($settings['system_printer'] ?? 'default') == 'laser' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'طابعة ليزر' : 'Laser Printer' }}</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" name="print_silent_mode" value="1" {{ ($settings['print_silent_mode'] ?? false) ? 'checked' : '' }}>
-                                        <label class="form-check-label">{{ app()->getLocale() === 'ar' ? 'الطباعة الصامتة' : 'Silent Mode' }}</label>
-                                        <small class="text-muted d-block">{{ app()->getLocale() === 'ar' ? 'طباعة بدون نوافذ تأكيد' : 'Print without confirmation dialogs' }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
-
-            <!-- Action Buttons -->
-            <div class="d-flex gap-2 mt-3">
-                <button type="submit" class="btn btn-primary flex-grow-1">
-                    <i class="bi bi-save"></i> {{ app()->getLocale() === 'ar' ? 'حفظ الإعدادات' : 'Save Settings' }}
-                </button>
-                <a href="{{ route('settings.printing.designer') }}" class="btn btn-warning" target="_blank">
-                    <i class="bi bi-palette"></i> <span class="d-none d-md-inline">{{ app()->getLocale() === 'ar' ? 'المصمم' : 'Designer' }}</span>
-                </a>
-                <a href="{{ route('settings.printing.reports.index') }}" class="btn btn-info">
-                    <i class="bi bi-file-earmark-bar-graph"></i> <span class="d-none d-md-inline">{{ app()->getLocale() === 'ar' ? 'التقارير' : 'Reports' }}</span>
-                </a>
-                <a href="{{ route('settings.printing.logs') }}" class="btn btn-secondary">
-                    <i class="bi bi-journal-text"></i> {{ app()->getLocale() === 'ar' ? 'السجل' : 'Logs' }}
-                </a>
-            </div>
-        </div>
-
-        <!-- Info Panel -->
-        <div class="col-lg-4">
-            <!-- Quick Info -->
-            <div class="card shadow-sm mb-3">
-                <div class="card-header bg-info text-white">
-                    <h6 class="mb-0"><i class="bi bi-lightbulb"></i> {{ app()->getLocale() === 'ar' ? 'معلومات سريعة' : 'Quick Info' }}</h6>
-                </div>
-                <div class="card-body">
-                    <ul class="mb-0 small">
-                        <li class="mb-2">
-                            <strong>{{ app()->getLocale() === 'ar' ? 'الطباعة' : 'Print Mode' }}:</strong>
-                            <ul class="mt-1">
-                                <li>{{ app()->getLocale() === 'ar' ? 'Browser: طباعة المتصفح' : 'Browser: Browser print' }}</li>
-                                <li>{{ app()->getLocale() === 'ar' ? 'System: نافذة الطباعة' : 'System: Print dialog' }}</li>
-                                <li>{{ app()->getLocale() === 'ar' ? 'Custom: مقاسات خاصة' : 'Custom: Special sizes' }}</li>
-                            </ul>
-                        </li>
-                        <li class="mb-2">
-                            <strong>{{ app()->getLocale() === 'ar' ? 'النسخ' : 'Copies' }}:</strong> {{ app()->getLocale() === 'ar' ? 'عدد النسخ المطبوعة' : 'Number of printed copies' }}
-                        </li>
-                        <li>
-                            <strong>{{ app()->getLocale() === 'ar' ? 'المصمم' : 'Designer' }}:</strong> {{ app()->getLocale() === 'ar' ? 'لتصميم شكل الإيصال' : 'For receipt layout design' }}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Designer Promo -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-warning">
-                    <h6 class="mb-0"><i class="bi bi-palette"></i> {{ app()->getLocale() === 'ar' ? 'مصمم الإيصال' : 'Receipt Designer' }}</h6>
-                </div>
-                <div class="card-body">
-                    <p class="small mb-2">{{ app()->getLocale() === 'ar' ? 'صمم شكل الإيصال بنفسك!' : 'Design your receipt layout!' }}</p>
-                    <ul class="small mb-3">
-                        <li>{{ app()->getLocale() === 'ar' ? 'ترتيب العناصر' : 'Arrange elements' }}</li>
-                        <li>{{ app()->getLocale() === 'ar' ? 'تحديد المواقع' : 'Position elements' }}</li>
-                        <li>{{ app()->getLocale() === 'ar' ? 'تغيير الأحجام' : 'Change sizes' }}</li>
-                        <li>{{ app()->getLocale() === 'ar' ? 'معاينة مباشرة' : 'Live preview' }}</li>
-                    </ul>
-                    <a href="{{ route('settings.printing.designer') }}" class="btn btn-warning btn-sm w-100" target="_blank>
-                        <i class="bi bi-box-arrow-up-right"></i> {{ app()->getLocale() === 'ar' ? 'افتح المصمم' : 'Open Designer' }}
-                    </a>
-                </div>
-            </div>
-        </div>
+        </form>
     </div>
-</form>
+
+    <!-- Report Settings Tab -->
+    <div class="tab-pane fade" id="report" role="tabpanel">
+        <form action="{{ route('settings.printing.updateReport') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="bi bi-file-earmark-bar-graph"></i> {{ app()->getLocale() === 'ar' ? 'إعدادات طباعة التقارير' : 'Report Print Settings' }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ app()->getLocale() === 'ar' ? 'الطابعة' : 'Printer' }}</label>
+                                <select class="form-select" name="report_printer_name">
+                                    <option value="default">{{ app()->getLocale() === 'ar' ? 'الطابعة الافتراضية' : 'Default Printer' }}</option>
+                                    <option value="laser" {{ ($reportSettings['report_printer_name'] ?? '') == 'laser' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'طابعة ليزر' : 'Laser Printer' }}</option>
+                                    <option value="inkjet" {{ ($reportSettings['report_printer_name'] ?? '') == 'inkjet' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'طابعة حبر' : 'Inkjet Printer' }}</option>
+                                    <option value="network" {{ ($reportSettings['report_printer_name'] ?? '') == 'network' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'طابعة شبكة' : 'Network Printer' }}</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ app()->getLocale() === 'ar' ? 'نوع الطباعة' : 'Print Mode' }}</label>
+                                <select class="form-select" name="report_print_mode" id="report_print_mode">
+                                    <option value="browser" {{ ($reportSettings['report_print_mode'] ?? 'browser') == 'browser' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'متصفح (تلقائي)' : 'Browser (Auto)' }}</option>
+                                    <option value="system" {{ ($reportSettings['report_print_mode'] ?? 'browser') == 'system' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'مدير الطباعة (Windows)' : 'Print Manager (Windows)' }}</option>
+                                    <option value="custom" {{ ($reportSettings['report_print_mode'] ?? 'browser') == 'custom' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'مقاس مخصص' : 'Custom Size' }}</option>
+                                </select>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label fw-bold">{{ app()->getLocale() === 'ar' ? 'حجم الورق' : 'Paper Size' }}</label>
+                                    <select class="form-select" name="report_paper_size" id="report_paper_size">
+                                        <option value="A4" {{ ($reportSettings['report_paper_size'] ?? 'A4') == 'A4' ? 'selected' : '' }}>A4 (210 × 297 mm)</option>
+                                        <option value="Letter" {{ ($reportSettings['report_paper_size'] ?? 'A4') == 'Letter' ? 'selected' : '' }}>Letter (216 × 279 mm)</option>
+                                        <option value="Legal" {{ ($reportSettings['report_paper_size'] ?? 'A4') == 'Legal' ? 'selected' : '' }}>Legal (216 × 356 mm)</option>
+                                        <option value="Custom" {{ ($reportSettings['report_paper_size'] ?? 'A4') == 'Custom' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'مخصص' : 'Custom' }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-bold">{{ app()->getLocale() === 'ar' ? 'الاتجاه' : 'Orientation' }}</label>
+                                    <select class="form-select" name="report_orientation">
+                                        <option value="portrait" {{ ($reportSettings['report_orientation'] ?? 'portrait') == 'portrait' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'طولي' : 'Portrait' }}</option>
+                                        <option value="landscape" {{ ($reportSettings['report_orientation'] ?? 'portrait') == 'landscape' ? 'selected' : '' }}>{{ app()->getLocale() === 'ar' ? 'عرضي' : 'Landscape' }}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div id="report_custom_size_fields" class="row mt-3" style="display: none;">
+                                <div class="col-6">
+                                    <label class="form-label">{{ app()->getLocale() === 'ar' ? 'العرض (مم)' : 'Width (mm)' }}</label>
+                                    <input type="number" class="form-control" name="report_custom_width" value="{{ $reportSettings['report_custom_width'] ?? 210 }}" min="50" max="350">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">{{ app()->getLocale() === 'ar' ? 'الطول (مم)' : 'Height (mm)' }}</label>
+                                    <input type="number" class="form-control" name="report_custom_height" value="{{ $reportSettings['report_custom_height'] ?? 297 }}" min="50" max="500">
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-bold">{{ app()->getLocale() === 'ar' ? 'عدد النسخ' : 'Copies' }}</label>
+                                    <input type="number" class="form-control" name="report_copies" value="{{ $reportSettings['report_copies'] ?? 1 }}" min="1" max="10">
+                                </div>
+                                <div class="col-6 d-flex align-items-end">
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" name="report_auto_print" value="1" {{ ($reportSettings['report_auto_print'] ?? false) ? 'checked' : '' }}>
+                                        <label class="form-check-label">{{ app()->getLocale() === 'ar' ? 'طباعة تلقائية' : 'Auto-Print' }}</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <h6 class="mb-3">{{ app()->getLocale() === 'ar' ? 'خيارات إضافية' : 'Additional Options' }}</h6>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" name="report_show_header" value="1" {{ ($reportSettings['report_show_header'] ?? true) ? 'checked' : '' }}>
+                                <label class="form-check-label">{{ app()->getLocale() === 'ar' ? 'عرض الترويسة' : 'Show Header' }}</label>
+                            </div>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" name="report_show_footer" value="1" {{ ($reportSettings['report_show_footer'] ?? true) ? 'checked' : '' }}>
+                                <label class="form-check-label">{{ app()->getLocale() === 'ar' ? 'عرض التذييل' : 'Show Footer' }}</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success mt-3">
+                        <i class="bi bi-save"></i> {{ app()->getLocale() === 'ar' ? 'حفظ إعدادات التقارير' : 'Save Report Settings' }}
+                    </button>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="bi bi-lightbulb"></i> {{ app()->getLocale() === 'ar' ? 'معلومات سريعة' : 'Quick Info' }}</h6>
+                        </div>
+                        <div class="card-body">
+                            <h6>{{ app()->getLocale() === 'ar' ? 'الإعدادات الحالية' : 'Current Settings' }}</h6>
+                            <ul class="small mb-0">
+                                <li><strong>{{ app()->getLocale() === 'ar' ? 'الطابعة' : 'Printer' }}:</strong> {{ ($reportSettings['report_printer_name'] ?? 'default') == 'default' ? (app()->getLocale() === 'ar' ? 'الافتراضية' : 'Default') : (($reportSettings['report_printer_name'] ?? '') == 'laser' ? (app()->getLocale() === 'ar' ? 'ليزر' : 'Laser') : (($reportSettings['report_printer_name'] ?? '') == 'inkjet' ? (app()->getLocale() === 'ar' ? 'حبر' : 'Inkjet') : (app()->getLocale() === 'ar' ? 'شبكة' : 'Network'))) }}</li>
+                                <li><strong>{{ app()->getLocale() === 'ar' ? 'الحجم' : 'Size' }}:</strong> {{ $reportSettings['report_paper_size'] ?? 'A4' }} ({{ ($reportSettings['report_orientation'] ?? 'portrait') == 'portrait' ? (app()->getLocale() === 'ar' ? 'طولي' : 'Portrait') : (app()->getLocale() === 'ar' ? 'عرضي' : 'Landscape') }})</li>
+                                <li><strong>{{ app()->getLocale() === 'ar' ? 'النسخ' : 'Copies' }}:</strong> {{ $reportSettings['report_copies'] ?? 1 }}</li>
+                                <li><strong>{{ app()->getLocale() === 'ar' ? 'تلقائي' : 'Auto' }}:</strong> {{ ($reportSettings['report_auto_print'] ?? false) ? (app()->getLocale() === 'ar' ? 'نعم' : 'Yes') : (app()->getLocale() === 'ar' ? 'لا' : 'No') }}</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm mt-3">
+                        <div class="card-header bg-warning">
+                            <h6 class="mb-0"><i class="bi bi-info-circle"></i> {{ app()->getLocale() === 'ar' ? 'ملاحظة' : 'Note' }}</h6>
+                        </div>
+                        <div class="card-body small">
+                            <p class="mb-0">{{ app()->getLocale() === 'ar' ? 'يمكنك تغيير هذه الإعدادات في أي وقت دون التأثير على إعدادات الإيصالات.' : 'You can change these settings anytime without affecting receipt settings.' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 @endsection
 
 @push('scripts')
 <script>
-// Show/hide custom size fields
+// Receipt custom size fields
 document.addEventListener('DOMContentLoaded', function() {
-    const printModeSelect = document.getElementById('print_mode');
-    const customSizeFields = document.getElementById('custom_size_fields');
+    const receiptPrintMode = document.getElementById('receipt_print_mode');
+    const receiptCustomSize = document.getElementById('receipt_custom_size_fields');
 
-    if (printModeSelect) {
-        printModeSelect.addEventListener('change', function() {
-            customSizeFields.style.display = (this.value === 'custom') ? 'block' : 'none';
+    if (receiptPrintMode) {
+        receiptPrintMode.addEventListener('change', function() {
+            receiptCustomSize.style.display = (this.value === 'custom') ? 'block' : 'none';
         });
+        receiptPrintMode.dispatchEvent(new Event('change'));
+    }
 
-        // Trigger on load
-        printModeSelect.dispatchEvent(new Event('change'));
+    // Report custom size fields
+    const reportPrintMode = document.getElementById('report_print_mode');
+    const reportCustomSize = document.getElementById('report_custom_size_fields');
+    const reportPaperSize = document.getElementById('report_paper_size');
+
+    if (reportPaperSize) {
+        reportPaperSize.addEventListener('change', function() {
+            reportCustomSize.style.display = (this.value === 'Custom') ? 'block' : 'none';
+        });
+        reportPaperSize.dispatchEvent(new Event('change'));
+    }
+
+    if (reportPrintMode) {
+        reportPrintMode.addEventListener('change', function() {
+            reportCustomSize.style.display = (this.value === 'custom' || reportPaperSize.value === 'Custom') ? 'block' : 'none';
+        });
     }
 });
 </script>
