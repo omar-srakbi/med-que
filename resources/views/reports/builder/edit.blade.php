@@ -174,46 +174,53 @@
 
 @push('scripts')
 <script>
-let hasUnsavedChanges = false;
-const unsavedIndicator = document.getElementById('unsavedIndicator');
-const saveBtn = document.getElementById('saveBtn');
+document.addEventListener('DOMContentLoaded', function() {
+    let hasUnsavedChanges = false;
+    const unsavedIndicator = document.getElementById('unsavedIndicator');
+    const saveBtn = document.getElementById('saveBtn');
+    const form = document.querySelector('form');
 
-// Track changes
-document.querySelectorAll('input, textarea, select').forEach(element => {
-    element.addEventListener('change', () => {
-        hasUnsavedChanges = true;
+    if (!unsavedIndicator || !saveBtn || !form) {
+        return;
+    }
+
+    // Update visual indicator
+    function updateIndicator() {
+        if (hasUnsavedChanges) {
+            unsavedIndicator.style.display = 'inline-block';
+            saveBtn.innerHTML = '<i class="bi bi-save"></i> {{ app()->getLocale() === 'ar' ? 'احفظ قبل المتابعة' : 'Save Before Leaving' }}';
+        } else {
+            unsavedIndicator.style.display = 'none';
+            saveBtn.innerHTML = '<i class="bi bi-check-circle"></i> {{ app()->getLocale() === 'ar' ? 'حفظ التغييرات' : 'Save Changes' }}';
+        }
+    }
+
+    // Track changes
+    document.querySelectorAll('input, textarea, select').forEach(element => {
+        element.addEventListener('change', () => {
+            hasUnsavedChanges = true;
+            updateIndicator();
+        });
+        element.addEventListener('input', () => {
+            hasUnsavedChanges = true;
+            updateIndicator();
+        });
+    });
+
+    // Warn before leaving
+    window.addEventListener('beforeunload', (e) => {
+        if (hasUnsavedChanges) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        }
+    });
+
+    // Form submission
+    form.addEventListener('submit', function() {
+        hasUnsavedChanges = false;
         updateIndicator();
     });
-    element.addEventListener('input', () => {
-        hasUnsavedChanges = true;
-        updateIndicator();
-    });
-});
-
-// Update visual indicator
-function updateIndicator() {
-    if (hasUnsavedChanges) {
-        unsavedIndicator.style.display = 'inline-block';
-        saveBtn.innerHTML = '<i class="bi bi-save"></i> {{ app()->getLocale() === 'ar' ? 'احفظ قبل المتابعة' : 'Save Before Leaving' }}';
-    } else {
-        unsavedIndicator.style.display = 'none';
-        saveBtn.innerHTML = '<i class="bi bi-check-circle"></i> {{ app()->getLocale() === 'ar' ? 'حفظ التغييرات' : 'Save Changes' }}';
-    }
-}
-
-// Warn before leaving
-window.addEventListener('beforeunload', (e) => {
-    if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = '';
-        return '';
-    }
-});
-
-// Form submission
-document.querySelector('form').addEventListener('submit', function() {
-    hasUnsavedChanges = false;
-    updateIndicator();
 });
 </script>
 @endpush

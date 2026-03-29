@@ -13,6 +13,9 @@
                 <i class="bi bi-hdd"></i> {{ app()->getLocale() === 'ar' ? 'مخزن' : 'Cached' }} {{ $cachedAt->diffForHumans() }}
             </span>
             @endif
+            <button onclick="resetLabels()" class="btn btn-sm btn-outline-secondary" title="{{ app()->getLocale() === 'ar' ? 'استعادة الأسماء الأصلية' : 'Restore original names' }}">
+                <i class="bi bi-arrow-counterclockwise"></i> {{ app()->getLocale() === 'ar' ? 'استعادة الأسماء' : 'Restore Names' }}
+            </button>
             <button onclick="printReport()" class="btn btn-sm btn-primary">
                 <i class="bi bi-printer"></i> {{ app()->getLocale() === 'ar' ? 'طباعة' : 'Print' }}
             </button>
@@ -49,7 +52,7 @@
                         @foreach(array_keys($data[0]) as $index => $key)
                         <th id="th_{{ $index }}" style="position: relative; white-space: normal; vertical-align: middle; text-align: center;">
                             <div style="display: flex; justify-content: center; align-items: center;">
-                                <span style="word-wrap: break-word;">{{ $report->column_labels[$key] ?? ucfirst(str_replace('_', ' ', $key)) }}</span>
+                                <span class="column-header-text" style="word-wrap: break-word; cursor: pointer;" title="{{ app()->getLocale() === 'ar' ? 'انقر للتحرير' : 'Click to edit' }}" data-column="{{ $key }}">{{ $report->column_labels[$key] ?? ucfirst(str_replace('_', ' ', $key)) }}</span>
                                 <div class="resizer-r" data-index="{{ $index }}" style="width: 5px; cursor: col-resize; background: transparent; height: 100%; position: absolute; {{ app()->getLocale() === 'ar' ? 'left' : 'right' }}: 0; top: 0;"></div>
                             </div>
                         </th>
@@ -135,6 +138,36 @@
     right: auto !important;
 }
 
+/* Column header editing */
+.column-header-text {
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    min-width: 50px;
+    display: inline-block;
+}
+
+.column-header-text:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    outline: 2px dashed #0d6efd;
+}
+
+.column-header-input {
+    width: 100%;
+    padding: 4px 8px;
+    border: 2px solid #0d6efd;
+    border-radius: 4px;
+    font-size: inherit;
+    font-weight: inherit;
+    background: white;
+    color: #212529;
+    min-width: 80px;
+}
+
+.column-header-text.editing {
+    display: none;
+}
+
 /* Print styles */
 @media print {
     body * {
@@ -189,12 +222,14 @@
 <script>
 let columnWidths = {};
 let rowHeights = {};
+let columnLabels = {};
 
 // Load saved sizes from localStorage
 function loadSizes() {
     const savedColumns = localStorage.getItem('report_{{ $report->id }}_columns');
     const savedRows = localStorage.getItem('report_{{ $report->id }}_rows');
-    
+    const savedLabels = localStorage.getItem('report_{{ $report->id }}_labels');
+
     if (savedColumns) {
         columnWidths = JSON.parse(savedColumns);
         Object.entries(columnWidths).forEach(([index, width]) => {
@@ -205,7 +240,7 @@ function loadSizes() {
         });
     }
     // No default widths - let browser auto-size based on content
-    
+
     if (savedRows) {
         rowHeights = JSON.parse(savedRows);
         Object.entries(rowHeights).forEach(([index, height]) => {
@@ -216,11 +251,175 @@ function loadSizes() {
             }
         });
     }
+
+    if (savedLabels) {
+        columnLabels = JSON.parse(savedLabels);
+        // Apply saved labels to the DOM
+        Object.entries(columnLabels).forEach(([column, label]) => {
+            const span = document.querySelector(`.column-header-text[data-column="${column}"]`);
+            if (span) {
+                span.textContent = label;
+            }
+        });
+    }
 }
 
 // Print function
 function printReport() {
     window.print();
+}
+
+// Column header editing
+document.querySelectorAll('.column-header-text').forEach(span => {
+    span.addEventListener('click', function(e) {
+        // Don't trigger if clicking on resizer
+        if (e.target.classList.contains('resizer-r')) {
+            return;
+        }
+        makeEditable(this);
+    });
+});
+
+function makeEditable(span) {
+    // Prevent multiple edits
+    if (span.classList.contains('editing')) {
+        return;
+    }
+    
+    const columnKey = span.dataset.column;
+    const currentValue = span.textContent.trim();
+    const th = span.closest('th');
+    const containerDiv = th.querySelector('div');
+    
+    if (!containerDiv) {
+        console.error('Container div not found');
+        return;
+    }
+    
+    // Create input field
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'column-header-input';
+    input.value = currentValue;
+    input.style.width = '150px';
+    
+    // Add input to container and hide span
+    span.classList.add('editing');
+    containerDiv.insertBefore(input, span);
+    input.focus();
+    input.select();
+    
+    // Save on blur or Enter
+    function save() {
+        const newValue = input.value.trim();
+        
+        // Update span text
+        span.textContent = newValue || ucfirst(columnKey.replace(/_/g, ' '));
+        span.classList.remove('editing');
+        input.remove();
+        
+        if (newValue !== currentValue) {
+            // Save to localStorage
+            columnLabels[columnKey] = newValue;
+            localStorage.setItem('report_{{ $report->id }}_labels', JSON.stringify(columnLabels));
+            
+            // Show saving indicator
+            showSaveStatus('{{ app()->getLocale() === 'ar' ? 'جاري الحفظ...' : 'Saving...' }}');
+            
+            // Save to server via AJAX
+            saveColumnLabel(columnKey, newValue);
+        }
+    }
+    
+    input.addEventListener('blur', save);
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            save();
+        } else if (e.key === 'Escape') {
+            span.classList.remove('editing');
+            input.remove();
+        }
+    });
+}
+
+function saveColumnLabel(column, label) {
+    fetch('{{ route('reports.builder.update-labels', $report) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ column, label })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSaveStatus('{{ app()->getLocale() === 'ar' ? 'تم الحفظ بنجاح!' : 'Saved successfully!' }}', 'success');
+        } else {
+            showSaveStatus('{{ app()->getLocale() === 'ar' ? 'فشل الحفظ' : 'Failed to save' }}', 'error');
+        }
+    })
+    .catch(err => {
+        console.error('Error saving label:', err);
+        showSaveStatus('{{ app()->getLocale() === 'ar' ? 'حدث خطأ' : 'Error occurred' }}', 'error');
+    });
+}
+
+function showSaveStatus(message, type = 'info') {
+    // Remove existing status
+    const existing = document.querySelector('.save-status');
+    if (existing) {
+        existing.remove();
+    }
+    
+    const status = document.createElement('div');
+    status.className = `save-status position-fixed bottom-0 end-0 m-3 px-3 py-2 rounded shadow-lg text-white bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'}`;
+    status.style.zIndex = '9999';
+    status.textContent = message;
+    document.body.appendChild(status);
+    
+    setTimeout(() => {
+        status.remove();
+    }, 2000);
+}
+
+function ucfirst(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Reset column labels to original names
+function resetLabels() {
+    if (confirm('{{ app()->getLocale() === 'ar' ? 'هل أنت متأكد من استعادة الأسماء الأصلية؟' : 'Are you sure you want to restore original column names?' }}')) {
+        // Clear localStorage
+        localStorage.removeItem('report_{{ $report->id }}_labels');
+        columnLabels = {};
+        
+        // Reset all column headers to their original names
+        document.querySelectorAll('.column-header-text').forEach(span => {
+            const columnKey = span.dataset.column;
+            span.textContent = ucfirst(columnKey.replace(/_/g, ' '));
+        });
+        
+        // Save to server
+        fetch('{{ route('reports.builder.update-labels', $report) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ reset: true })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSaveStatus('{{ app()->getLocale() === 'ar' ? 'تم استعادة الأسماء الأصلية' : 'Original names restored' }}', 'success');
+            }
+        })
+        .catch(err => {
+            console.error('Error resetting labels:', err);
+        });
+    }
 }
 
 // Column resize

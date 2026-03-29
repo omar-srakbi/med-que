@@ -205,7 +205,7 @@ class ReportBuilderController extends Controller
 
         // Check cache first
         $cached = $report->getCache();
-        
+
         if ($cached && $cached['cached']) {
             $data = $cached['data'];
             $isCached = true;
@@ -219,18 +219,59 @@ class ReportBuilderController extends Controller
                 $report->filters,
                 1000
             );
-            
+
             // Cache if enabled and large dataset
             if ($report->cache_enabled && count($data) > 50000) {
                 $report->setCache($data);
             }
-            
+
             $isCached = false;
             $cachedAt = null;
             $expiresAt = null;
         }
 
         return view('reports.builder.show', compact('report', 'data', 'isCached', 'cachedAt', 'expiresAt'));
+    }
+
+    public function updateLabels(Request $request, CustomReport $report)
+    {
+        if (!$report->canEdit(auth()->user())) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $columnLabels = $report->column_labels ?? [];
+            
+            // Handle reset all labels
+            if ($request->input('reset')) {
+                $report->update([
+                    'column_labels' => null,
+                    'updated_by' => auth()->id(),
+                ]);
+                return response()->json(['success' => true]);
+            }
+            
+            $validated = $request->validate([
+                'column' => 'required|string',
+                'label' => 'nullable|string|max:255',
+            ]);
+            
+            if (empty($validated['label'])) {
+                // Remove the label if empty
+                unset($columnLabels[$validated['column']]);
+            } else {
+                $columnLabels[$validated['column']] = $validated['label'];
+            }
+
+            $report->update([
+                'column_labels' => !empty($columnLabels) ? $columnLabels : null,
+                'updated_by' => auth()->id(),
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     private function getDataSources()

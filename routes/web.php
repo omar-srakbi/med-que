@@ -132,6 +132,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('reports/builder/{report}', [ReportBuilderController::class, 'destroy'])->name('reports.builder.destroy');
     Route::post('reports/builder/preview', [ReportBuilderController::class, 'preview'])->name('reports.builder.preview');
     Route::get('reports/builder/{report}/show', [ReportBuilderController::class, 'show'])->name('reports.builder.show');
+    Route::post('reports/builder/{report}/update-labels', [ReportBuilderController::class, 'updateLabels'])->name('reports.builder.update-labels');
     
     // Search
     Route::get('search', [SearchController::class, 'search'])->name('search');
