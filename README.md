@@ -35,11 +35,15 @@ A comprehensive clinic management system built with Laravel 12 for managing pati
 ### 🎫 Ticket & Queue System
 - ✅ Same-day ticket creation
 - ✅ Advance booking (next day) - Head Cashier only
-- ✅ Automatic queue number generation
+- ✅ **Shared yearly ticket sequence** (99M capacity per year)
+- ✅ **Per-department queue numbers** (daily reset)
+- ✅ **Ticket Format:** `TK00000001` (2-char prefix + 8 digits)
+- ✅ **Queue Format:** `Q10001` (unique prefix + 4 digits)
 - ✅ Real-time queue display screen
 - ✅ Custom service shortcuts (e.g., CBC, XRAY, MRI)
 - ✅ Quick select by typing shortcut codes
-- ✅ Department-specific ticket numbering formats
+- ✅ **Auto-suggest** for available queue prefixes
+- ✅ **Real-time validation** for duplicate prefixes
 
 ### 🏢 Departments & Services
 - ✅ 6 pre-configured departments:
@@ -236,21 +240,42 @@ Configure per department:
 
 | Setting | Example | Description |
 |---------|---------|-------------|
-| **Ticket Prefix** | `TKT`, `OPD`, `ER` | Appears at start of ticket number |
-| **Number Format** | `{prefix}-{date}-{seq}` | Pattern for ticket numbers |
-| **Sequence Padding** | `4` | Number of digits (4 = 0001) |
+| **Ticket Prefix** | `TK`, `OP`, `ER` | Shared among departments (2 chars) |
+| **Queue Prefix** | `Q1`, `CL`, `XR` | Unique per department (2 chars) |
 
-**Variables:**
-- `{prefix}` - Department prefix
-- `{date}` - Date (YYYYMMDD)
-- `{seq}` - Sequence number
-- `{dept}` - Department abbreviation
+**How It Works:**
 
-**Example Format:**
+**Ticket Numbers (Yearly, Shared):**
 ```
-Format: {prefix}-{date}-{seq}
-Result: TKT-20260324-0001
+Format: {prefix}{sequence}
+Example: TK00000001
+
+All departments with same prefix share ONE counter:
+- Clinics (TK): TK00000001, TK00000003, TK00000005...
+- Radiology (TK): TK00000002, TK00000004, TK00000006...
 ```
+
+**Queue Numbers (Daily, Per-Department):**
+```
+Format: {queue_prefix}{sequence}
+Example: Q10001
+
+Each department has its own queue counter:
+- Clinics (Q1): Q10001, Q10002, Q10003... (resets daily)
+- Radiology (Q4): Q40001, Q40002, Q40003... (resets daily)
+```
+
+**Capacity:**
+- **Ticket Numbers:** 99,999,999 per year (shared)
+- **Queue Numbers:** 9,999 per day (per department)
+
+**Auto-Suggest Feature:**
+When creating a new department:
+1. Click on **Queue Prefix** field
+2. System auto-fills next available prefix (e.g., `Q7`)
+3. Or type any 2-character alphanumeric code
+4. Real-time validation warns if prefix is taken
+5. Click suggested button to auto-fill available prefix
 
 ---
 
@@ -584,8 +609,8 @@ Built with:
 
 ---
 
-**Last Updated:** March 2026  
-**Version:** 1.0.0
+**Last Updated:** April 2026  
+**Version:** 1.2.0
 
 ---
 

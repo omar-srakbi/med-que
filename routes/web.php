@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::put('departments/services/{service}', [DepartmentController::class, 'updateService'])->name('departments.services.update');
     Route::delete('departments/services/{service}', [DepartmentController::class, 'destroyService'])->name('departments.services.destroy');
     Route::post('departments/{department}/ticket-settings', [DepartmentController::class, 'updateTicketSettings'])->name('departments.ticket-settings');
+    Route::get('departments/check-queue-prefix', [DepartmentController::class, 'checkQueuePrefix'])->name('departments.check-queue-prefix');
     
     // Ticket routes
     Route::resource('tickets', TicketController::class);

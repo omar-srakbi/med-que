@@ -13,6 +13,9 @@
                 <i class="bi bi-hdd"></i> {{ app()->getLocale() === 'ar' ? 'مخزن' : 'Cached' }} {{ $cachedAt->diffForHumans() }}
             </span>
             @endif
+            <a href="{{ route('reports.builder.edit', $report) }}" class="btn btn-sm btn-warning" title="{{ app()->getLocale() === 'ar' ? 'تعديل التقرير' : 'Edit Report' }}">
+                <i class="bi bi-pencil"></i> {{ app()->getLocale() === 'ar' ? 'تعديل' : 'Edit' }}
+            </a>
             <button onclick="resetLabels()" class="btn btn-sm btn-outline-secondary" title="{{ app()->getLocale() === 'ar' ? 'استعادة الأسماء الأصلية' : 'Restore original names' }}">
                 <i class="bi bi-arrow-counterclockwise"></i> {{ app()->getLocale() === 'ar' ? 'استعادة الأسماء' : 'Restore Names' }}
             </button>

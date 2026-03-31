@@ -29,9 +29,13 @@
                 
                 <hr>
                 <h6 class="mb-3"><i class="bi bi-ticket-perforated"></i> {{ app()->getLocale() === 'ar' ? 'إعدادات التذاكر' : 'Ticket Settings' }}</h6>
-                <p><strong>{{ app()->getLocale() === 'ar' ? 'بادئة التذكرة' : 'Ticket Prefix' }}:</strong> {{ $department->ticket_prefix }}</p>
-                <p><strong>{{ app()->getLocale() === 'ar' ? 'صيغة الرقم' : 'Number Format' }}:</strong> <code>{{ $department->ticket_number_format }}</code></p>
-                <p><strong>{{ app()->getLocale() === 'ar' ? 'تسلسل اليوم' : "Today's Sequence" }}:</strong> {{ $department->ticket_current_seq }}</p>
+                <p><strong>{{ app()->getLocale() === 'ar' ? 'بادئة التذكرة' : 'Ticket Prefix' }}:</strong> {{ $department->sequence_prefix }}</p>
+                <p><strong>{{ app()->getLocale() === 'ar' ? 'بادئة الطابور' : 'Queue Prefix' }}:</strong> {{ $department->queue_prefix ?? 'Q' }}</p>
+                <p><strong>{{ app()->getLocale() === 'ar' ? 'التسلسل الحالي' : 'Current Sequence' }}:</strong> {{ number_format($sequence->sequence_counter) }}</p>
+                <p><strong>{{ app()->getLocale() === 'ar' ? 'سنة التسلسل' : 'Sequence Year' }}:</strong> {{ $sequence->sequence_year }}</p>
+                <p><strong>{{ app()->getLocale() === 'ar' ? 'صيغة التذكرة' : 'Ticket Format' }}:</strong> <code>{{ $department->sequence_prefix }}{{ str_pad($sequence->sequence_counter + 1, 8, '0', STR_PAD_LEFT) }}</code></p>
+                <p><strong>{{ app()->getLocale() === 'ar' ? 'صيغة الطابور' : 'Queue Format' }}:</strong> <code>{{ $department->queue_prefix ?? 'Q' }}{{ str_pad(1, 4, '0', STR_PAD_LEFT) }}</code></p>
+                <p class="text-muted small"><i class="bi bi-info-circle"></i> {{ app()->getLocale() === 'ar' ? 'التسلسل مشترك بين جميع الأقسام التي تستخدم نفس البادئة' : 'Sequence is shared among all departments using the same prefix' }}</p>
                 
                 <div class="mt-3 d-grid gap-2">
                     <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#ticketSettingsModal">
@@ -205,22 +209,20 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">{{ app()->getLocale() === 'ar' ? 'بادئة التذكرة' : 'Ticket Prefix' }}</label>
-                        <input type="text" class="form-control" name="ticket_prefix" value="{{ $department->ticket_prefix }}" required>
-                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'مثال: TKT, OPD, ER' : 'Example: TKT, OPD, ER' }}</small>
+                        <input type="text" class="form-control" name="sequence_prefix" value="{{ $department->sequence_prefix }}" maxlength="2" required>
+                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'حرفان فقط - مشترك بين الأقسام (مثال: TK, OP, ER)' : 'Exactly 2 chars - shared among depts (e.g., TK, OP, ER)' }}</small>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">{{ app()->getLocale() === 'ar' ? 'صيغة رقم التذكرة' : 'Ticket Number Format' }}</label>
-                        <input type="text" class="form-control" name="ticket_number_format" value="{{ $department->ticket_number_format }}" required>
-                        <small class="text-muted d-block mt-1">{{ app()->getLocale() === 'ar' ? 'المتغيرات المتاحة:' : 'Available variables:' }}</small>
-                        <code class="text-primary">{prefix}</code> <small>= {{ app()->getLocale() === 'ar' ? 'البادئة' : 'prefix' }}</small><br>
-                        <code class="text-primary">{date}</code> <small>= {{ app()->getLocale() === 'ar' ? 'التاريخ (YYYYMMDD)' : 'date (YYYYMMDD)' }}</small><br>
-                        <code class="text-primary">{seq}</code> <small>= {{ app()->getLocale() === 'ar' ? 'التسلسل' : 'sequence' }}</small><br>
-                        <code class="text-primary">{dept}</code> <small>= {{ app()->getLocale() === 'ar' ? 'اختصار القسم' : 'dept abbreviation' }}</small>
+                        <label class="form-label">{{ app()->getLocale() === 'ar' ? 'بادئة الطابور' : 'Queue Prefix' }}</label>
+                        <input type="text" class="form-control" name="queue_prefix" value="{{ $department->queue_prefix ?? 'Q' }}" maxlength="2" required>
+                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'حرفان فقط - فريد لكل قسم (مثال: Q1, Q2, X5)' : 'Exactly 2 chars - unique per dept (e.g., Q1, Q2, X5)' }}</small>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">{{ app()->getLocale() === 'ar' ? 'عدد خانات التسلسل' : 'Sequence Padding' }}</label>
-                        <input type="number" class="form-control" name="ticket_seq_padding" value="{{ $department->ticket_seq_padding }}" min="2" max="10" required>
-                        <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'مثال: 4 = 0001' : 'Example: 4 = 0001' }}</small>
+                        <label class="form-label">{{ app()->getLocale() === 'ar' ? 'صيغة الأرقام' : 'Number Formats' }}</label>
+                        <div class="alert alert-info mb-0">
+                            <small><strong>{{ app()->getLocale() === 'ar' ? 'التذكرة' : 'Ticket' }}:</strong></small> <code>{{ $department->sequence_prefix ?? 'TK' }}00000001</code> ({{ app()->getLocale() === 'ar' ? 'سنوي مشترك' : 'yearly, shared' }})<br>
+                            <small><strong>{{ app()->getLocale() === 'ar' ? 'الطابور' : 'Queue' }}:</strong></small> <code>{{ $department->queue_prefix ?? 'Q' }}0001</code> ({{ app()->getLocale() === 'ar' ? 'يومي لكل قسم' : 'daily, per-dept' }})
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">{{ app()->getLocale() === 'ar' ? 'إعادة تعيين التسلسل' : 'Reset Sequence' }}</label>
@@ -228,6 +230,7 @@
                             <i class="bi bi-arrow-counterclockwise"></i> {{ app()->getLocale() === 'ar' ? 'تصفير العداد' : 'Reset Counter' }}
                         </button>
                         <input type="hidden" name="reset_sequence" id="reset_sequence" value="0">
+                        <small class="text-muted d-block mt-2">{{ app()->getLocale() === 'ar' ? 'يتم التعديل تلقائياً كل سنة' : 'Resets automatically every year' }}</small>
                     </div>
                 </div>
                 <div class="modal-footer">

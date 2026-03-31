@@ -15,21 +15,23 @@ class Department extends Model
         'name_ar',
         'description',
         'is_active',
-        'ticket_prefix',
-        'ticket_number_format',
-        'ticket_seq_padding',
-        'ticket_current_seq',
-        'ticket_seq_reset_date',
+        'sequence_prefix',
+        'queue_prefix',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
-            'ticket_seq_padding' => 'integer',
-            'ticket_current_seq' => 'integer',
-            'ticket_seq_reset_date' => 'date',
         ];
+    }
+
+    /**
+     * Get the sequence record for this department's prefix
+     */
+    public function sequence()
+    {
+        return $this->hasOne(TicketSequence::class, 'sequence_prefix', 'sequence_prefix');
     }
 
     public function services(): HasMany

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\Service;
+use App\Models\TicketSequence;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DepartmentController extends Controller
 {
@@ -25,10 +27,20 @@ class DepartmentController extends Controller
             'name' => 'required|string|max:255',
             'name_ar' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'sequence_prefix' => 'required|string|size:2|alpha',
+            'queue_prefix' => [
+                'required',
+                'string',
+                'size:2',
+                \Illuminate\Validation\Rule::unique('departments', 'queue_prefix'),
+            ],
         ]);
-        
+
+        $validated['sequence_prefix'] = strtoupper($validated['sequence_prefix']);
+        $validated['queue_prefix'] = strtoupper($validated['queue_prefix']);
+
         Department::create($validated);
-        
+
         return redirect()->route('departments.index')
             ->with('success', app()->getLocale() === 'ar' ? 'تم إضافة القسم بنجاح' : 'Department added successfully');
     }
@@ -36,7 +48,12 @@ class DepartmentController extends Controller
     public function show(Department $department)
     {
         $department->load('services');
-        return view('departments.show', compact('department'));
+        $currentYear = (int) now()->year;
+        $sequence = \App\Models\TicketSequence::firstOrCreate(
+            ['sequence_prefix' => $department->sequence_prefix, 'sequence_year' => $currentYear],
+            ['sequence_counter' => 0]
+        );
+        return view('departments.show', compact('department', 'sequence'));
     }
 
     public function edit(Department $department)
@@ -51,10 +68,20 @@ class DepartmentController extends Controller
             'name_ar' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
+            'sequence_prefix' => 'required|string|size:2|alpha',
+            'queue_prefix' => [
+                'required',
+                'string',
+                'size:2',
+                \Illuminate\Validation\Rule::unique('departments', 'queue_prefix')->ignore($department->id),
+            ],
         ]);
-        
+
+        $validated['sequence_prefix'] = strtoupper($validated['sequence_prefix']);
+        $validated['queue_prefix'] = strtoupper($validated['queue_prefix']);
+
         $department->update($validated);
-        
+
         return redirect()->route('departments.show', $department)
             ->with('success', app()->getLocale() === 'ar' ? 'تم تحديث القسم بنجاح' : 'Department updated successfully');
     }
@@ -116,25 +143,137 @@ class DepartmentController extends Controller
     public function updateTicketSettings(Request $request, Department $department)
     {
         $validated = $request->validate([
-            'ticket_prefix' => 'required|string|max:10',
-            'ticket_number_format' => 'required|string|max:255',
-            'ticket_seq_padding' => 'required|integer|min:2|max:10',
+            'sequence_prefix' => 'required|string|size:2',
+            'queue_prefix' => 'required|string|size:2',
             'reset_sequence' => 'nullable|integer',
         ]);
+
+        $newPrefix = strtoupper($validated['sequence_prefix']);
+        $newQueuePrefix = strtoupper($validated['queue_prefix']);
+
+        DB::beginTransaction();
+        try {
+            // Update department prefixes
+            $department->update([
+                'sequence_prefix' => $newPrefix,
+                'queue_prefix' => $newQueuePrefix,
+            ]);
+
+            // Reset sequence if requested (create new sequence record for this prefix)
+            if ($validated['reset_sequence'] == 1) {
+                $currentYear = (int) now()->year;
+                TicketSequence::updateOrCreate(
+                    ['sequence_prefix' => $newPrefix, 'sequence_year' => $currentYear],
+                    ['sequence_counter' => 0]
+                );
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Failed to update: ' . $e->getMessage()]);
+        }
+
+        return back()->with('success', app()->getLocale() === 'ar'
+            ? 'تم تحديث إعدادات التذاكر بنجاح'
+            : 'Ticket settings updated successfully');
+    }
+
+    /**
+     * Check if a queue prefix is available and suggest next available
+     */
+    public function checkQueuePrefix(Request $request)
+    {
+        $prefix = strtoupper(trim($request->input('prefix', '')));
         
-        $updateData = [
-            'ticket_prefix' => $validated['ticket_prefix'],
-            'ticket_number_format' => $validated['ticket_number_format'],
-            'ticket_seq_padding' => $validated['ticket_seq_padding'],
-        ];
+        // Validate input (2 characters, alphanumeric)
+        if (strlen($prefix) !== 2) {
+            return response()->json([
+                'valid' => false,
+                'available' => false,
+                'message' => app()->getLocale() === 'ar' 
+                    ? 'البادئة يجب أن تكون حرفين فقط' 
+                    : 'Prefix must be exactly 2 characters',
+            ]);
+        }
+
+        // Check if prefix exists
+        $exists = Department::where('queue_prefix', $prefix)->exists();
         
-        if ($validated['reset_sequence'] == 1) {
-            $updateData['ticket_current_seq'] = 0;
-            $updateData['ticket_seq_reset_date'] = today();
+        if ($exists) {
+            // Find next available prefix
+            $nextAvailable = $this->findNextAvailablePrefix();
+            return response()->json([
+                'valid' => true,
+                'available' => false,
+                'taken' => true,
+                'message' => app()->getLocale() === 'ar'
+                    ? 'هذه البادئة مستخدمة بالفعل'
+                    : 'This prefix is already taken',
+                'suggested' => $nextAvailable,
+            ]);
+        }
+
+        return response()->json([
+            'valid' => true,
+            'available' => true,
+            'taken' => false,
+            'message' => app()->getLocale() === 'ar'
+                ? 'هذه البادئة متاحة'
+                : 'This prefix is available',
+        ]);
+    }
+
+    /**
+     * Find the next available queue prefix
+     */
+    private function findNextAvailablePrefix(): string
+    {
+        $existing = Department::pluck('queue_prefix')->map(fn($p) => strtoupper($p))->toArray();
+        
+        // Generate prefixes in order: Q1-Q9, QA-QZ, then A1-A9, AA-AZ, B1-B9, etc.
+        $letters = range('A', 'Z');
+        $digits = range(1, 9);
+        
+        // First try Q + digit (Q1-Q9)
+        foreach ($digits as $digit) {
+            $prefix = 'Q' . $digit;
+            if (!in_array($prefix, $existing)) {
+                return $prefix;
+            }
         }
         
-        $department->update($updateData);
+        // Then try Q + letter (QA-QZ)
+        foreach ($letters as $letter) {
+            $prefix = 'Q' . $letter;
+            if (!in_array($prefix, $existing)) {
+                return $prefix;
+            }
+        }
         
-        return back()->with('success', app()->getLocale() === 'ar' ? 'تم تحديث إعدادات التذاكر بنجاح' : 'Ticket settings updated successfully');
+        // Then try all other combinations: A1-A9, AA-AZ, B1-B9, etc.
+        foreach ($letters as $letter) {
+            // Skip Q as we already checked it
+            if ($letter === 'Q') continue;
+            
+            // Letter + digit
+            foreach ($digits as $digit) {
+                $prefix = $letter . $digit;
+                if (!in_array($prefix, $existing)) {
+                    return $prefix;
+                }
+            }
+            
+            // Letter + letter
+            foreach ($letters as $secondLetter) {
+                $prefix = $letter . $secondLetter;
+                if (!in_array($prefix, $existing)) {
+                    return $prefix;
+                }
+            }
+        }
+        
+        // Fallback (should never reach here with 1296+ possibilities)
+        return 'Z9';
     }
 }

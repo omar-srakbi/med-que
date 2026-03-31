@@ -15,18 +15,40 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="name" class="form-label">{{ app()->getLocale() === 'ar' ? 'اسم القسم (إنجليزي)' : 'Department Name (English)' }} <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                    <input type="text" class="form-control @error('name') is-invalid @enderror"
                            id="name" name="name" value="{{ old('name', $department->name) }}" required>
                     @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                
+
                 <div class="col-md-6 mb-3">
                     <label for="name_ar" class="form-label">{{ app()->getLocale() === 'ar' ? 'اسم القسم (عربي)' : 'Department Name (Arabic)' }} <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('name_ar') is-invalid @enderror" 
+                    <input type="text" class="form-control @error('name_ar') is-invalid @enderror"
                            id="name_ar" name="name_ar" value="{{ old('name_ar', $department->name_ar) }}" required>
                     @error('name_ar')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="sequence_prefix" class="form-label">{{ app()->getLocale() === 'ar' ? 'بادئة التذكرة' : 'Ticket Prefix' }} <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control @error('sequence_prefix') is-invalid @enderror"
+                           id="sequence_prefix" name="sequence_prefix" value="{{ old('sequence_prefix', $department->sequence_prefix) }}" maxlength="2" required>
+                    <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'حرفان - مشترك بين الأقسام' : '2 chars - shared among depts' }}</small>
+                    @error('sequence_prefix')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="queue_prefix" class="form-label">{{ app()->getLocale() === 'ar' ? 'بادئة الطابور' : 'Queue Prefix' }} <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control @error('queue_prefix') is-invalid @enderror"
+                           id="queue_prefix" name="queue_prefix" value="{{ old('queue_prefix', $department->queue_prefix) }}" maxlength="2" required>
+                    <small class="text-muted">{{ app()->getLocale() === 'ar' ? 'حرفان - فريد لكل قسم' : '2 chars - unique per dept' }}</small>
+                    @error('queue_prefix')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

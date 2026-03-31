@@ -144,6 +144,51 @@ php artisan config:clear
 php artisan view:clear
 ```
 
+### 8. Shared Ticket Sequence System (Latest Update)
+**Problem:** Departments had isolated ticket counters, limiting sequence capacity
+**Solution:** Implemented shared yearly sequence with per-department queue prefixes
+
+**New Ticket Number Format:**
+- **Format:** `TK00000001` (2-char prefix + 8-digit sequence)
+- **Scope:** All departments with same prefix share ONE counter
+- **Capacity:** 99,999,999 tickets per year (shared)
+- **Resets:** Automatically every year
+
+**New Queue Number Format:**
+- **Format:** `Q10001` (2-char unique prefix + 4-digit sequence)
+- **Scope:** Per-department, per-day
+- **Capacity:** 9,999 tickets per day per department
+- **Resets:** Daily
+
+**Department Prefix Configuration:**
+| Department | Ticket Prefix (Shared) | Queue Prefix (Unique) |
+|------------|----------------------|----------------------|
+| Clinics | TK | Q1 |
+| Kidney Center | TK | Q2 |
+| Blood Laboratory | TK | Q3 |
+| Radiology Center | TK | Q4 |
+| MRI | TK | Q5 |
+| Physiological Treatment | TK | Q6 |
+
+**Features Added:**
+- Auto-suggest next available queue prefix when creating departments
+- Real-time validation warning for duplicate queue prefixes
+- Database unique constraint on `queue_prefix` column
+- Form fields for both prefixes in create/edit department forms
+
+**Files Modified:**
+- `app/Http/Controllers/TicketController.php` - Shared sequence logic
+- `app/Http/Controllers/DepartmentController.php` - Prefix validation + auto-suggest API
+- `app/Models/Department.php` - Added `queue_prefix` field
+- `app/Models/TicketSequence.php` - New model for global sequence tracking
+- `resources/views/departments/create.blade.php` - Auto-suggest JavaScript
+- `routes/web.php` - Added prefix check route
+
+**Migrations:**
+```bash
+php artisan migrate  # Runs all pending migrations
+```
+
 ---
 
 ## Files Modified
@@ -152,6 +197,47 @@ php artisan view:clear
 - Added database locking to prevent race conditions
 - Moved `DB::beginTransaction()` before department query
 - Added `lockForUpdate()` to Department, Ticket, and Payment queries
+- **Latest:** Changed to shared yearly sequence system (2-char + 8-digit)
+- **Latest:** Queue number uses per-department prefix (daily reset)
+
+### `app/Http/Controllers/DepartmentController.php`
+- **Latest:** Added `checkQueuePrefix()` API for availability checking
+- **Latest:** Added `findNextAvailablePrefix()` helper method
+- **Latest:** Updated validation to allow alphanumeric queue prefixes
+- **Latest:** Added unique constraint validation for queue_prefix
+
+### `app/Models/Department.php`
+- Added `queue_prefix` field to fillable
+- Added `sequence()` relationship to TicketSequence
+
+### `app/Models/TicketSequence.php`
+- **New:** Model for tracking global ticket sequences
+- Methods: `getOrCreate()`, `getNext()`, `resetForYear()`
+
+### `app/Models/Ticket.php`
+- No changes (uses new sequence system)
+
+### `resources/views/departments/create.blade.php`
+- Added sequence_prefix and queue_prefix form fields
+- **Latest:** Added JavaScript auto-suggest functionality
+- **Latest:** Real-time prefix validation with feedback
+
+### `resources/views/departments/edit.blade.php`
+- Added sequence_prefix and queue_prefix form fields
+
+### `resources/views/departments/show.blade.php`
+- Updated ticket settings display
+- Added queue prefix display
+- Updated modal with both prefix fields
+
+### `routes/web.php`
+- **Latest:** Added `departments.check-queue-prefix` route
+
+### `database/migrations/`
+- `2026_03_31_212014_update_department_sequence_system.php` - New sequence columns
+- `2026_03_31_212921_create_ticket_sequences_table.php` - Sequence tracking table
+- `2026_03_31_215750_add_queue_prefix_to_departments_table.php` - Queue prefix column
+- `2026_03_31_221531_add_unique_constraint_to_queue_prefix.php` - Unique constraint
 
 ---
 
@@ -210,4 +296,4 @@ php artisan view:clear
 ---
 
 ## Last Updated
-2026-03-26
+2026-04-01 (v1.2.0)

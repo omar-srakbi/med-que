@@ -163,23 +163,23 @@ print_header "Step 8: Running Database Seeders"
 php artisan db:seed --force
 print_success "Database seeders completed"
 
-# Step 9: Fix Department Ticket Prefixes (Prevent Duplicate Ticket Numbers)
-print_header "Step 9: Setting Unique Department Ticket Prefixes"
+# Step 9: Setup Department Prefixes (Shared Ticket Sequence + Unique Queue Prefixes)
+print_header "Step 9: Configuring Department Prefixes"
 php artisan tinker --execute="
 \$depts = [
-    1 => ['prefix' => 'CLN'],
-    2 => ['prefix' => 'KID'],
-    3 => ['prefix' => 'LAB'],
-    4 => ['prefix' => 'RAD'],
-    5 => ['prefix' => 'MRI'],
-    6 => ['prefix' => 'PHY'],
+    1 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q1'],
+    2 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q2'],
+    3 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q3'],
+    4 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q4'],
+    5 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q5'],
+    6 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q6'],
 ];
 foreach(\$depts as \$id => \$data) {
     App\Models\Department::find(\$id)?->update(\$data);
 }
 echo 'Done';
 "
-print_success "Department ticket prefixes configured"
+print_success "Department prefixes configured (shared ticket sequence + unique queue prefixes)"
 
 # Step 10: Clear Caches
 print_header "Step 10: Clearing Caches"

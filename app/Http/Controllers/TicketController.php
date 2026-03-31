@@ -7,6 +7,7 @@ use App\Models\Patient;
 use App\Models\Department;
 use App\Models\Service;
 use App\Models\Payment;
+use App\Models\TicketSequence;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -84,39 +85,30 @@ class TicketController extends Controller
         
         // Get service price
         $service = Service::findOrFail($validated['service_id']);
-        
-        // Get department for ticket number format
+
+        // Get department for sequence
         $department = Department::findOrFail($validated['department_id']);
-        
-        // Check if sequence needs to be reset (new day)
-        if (!$department->ticket_seq_reset_date || $department->ticket_seq_reset_date->format('Y-m-d') !== $visitDate->format('Y-m-d')) {
-            $department->update([
-                'ticket_current_seq' => 0,
-                'ticket_seq_reset_date' => $visitDate,
-            ]);
-            $department->refresh();
-        }
-        
-        // Generate queue number for this department on visit date
+
+        // Get or create global sequence (shared across all departments with same prefix)
+        $currentYear = (int) now()->year;
+        $sequence = TicketSequence::getOrCreate($department->sequence_prefix, $currentYear);
+
+        // Reset sequence if new year
+        $sequence->resetForYear($currentYear);
+
+        // Generate queue number for this department (per-day, unique prefix + 4 digits)
         $queueNumber = Ticket::where('department_id', $validated['department_id'])
             ->whereDate('visit_date', $validated['visit_date'])
             ->count() + 1;
-        
-        // Increment sequence
-        $department->increment('ticket_current_seq');
-        $sequence = str_pad($department->ticket_current_seq, $department->ticket_seq_padding, '0', STR_PAD_LEFT);
-        
-        // Generate ticket number based on format
-        $ticketNumber = str_replace(
-            ['{prefix}', '{date}', '{seq}', '{dept}'],
-            [
-                $department->ticket_prefix ?? 'TKT',
-                $visitDate->format('Ymd'),
-                $sequence,
-                strtoupper(substr($department->name, 0, 3))
-            ],
-            $department->ticket_number_format ?? '{prefix}-{date}-{seq}'
-        );
+        $queuePrefix = $department->queue_prefix ?? 'Q';
+        $queueNumberFormatted = $queuePrefix . str_pad($queueNumber, 4, '0', STR_PAD_LEFT);
+
+        // Get next sequence number (increments globally)
+        $nextNumber = $sequence->getNext();
+        $sequenceNumber = str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
+
+        // Generate ticket number: 2-char prefix + 8-digit sequence
+        $ticketNumber = $department->sequence_prefix . $sequenceNumber;
         
         DB::beginTransaction();
         try {
@@ -127,7 +119,7 @@ class TicketController extends Controller
                 'department_id' => $validated['department_id'],
                 'service_id' => $validated['service_id'],
                 'cashier_id' => auth()->id(),
-                'queue_number' => $queueNumber,
+                'queue_number' => $queueNumberFormatted,
                 'amount_paid' => $service->price,
                 'visit_date' => $validated['visit_date'],
                 'created_at_time' => now(),

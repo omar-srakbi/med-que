@@ -142,8 +142,13 @@ class ReportBuilderController extends Controller
         $columnLabels = [];
         if (!empty($validated['column_labels']) && !empty($validated['columns'])) {
             foreach ($validated['columns'] as $column) {
-                if (isset($validated['column_labels'][$column]) && !empty($validated['column_labels'][$column])) {
-                    $columnLabels[$column] = $validated['column_labels'][$column];
+                // Include label even if empty (user might have cleared it)
+                if (isset($validated['column_labels'][$column])) {
+                    $label = $validated['column_labels'][$column];
+                    // Only save non-empty labels
+                    if (!empty($label)) {
+                        $columnLabels[$column] = $label;
+                    }
                 }
             }
         }
@@ -304,7 +309,7 @@ class ReportBuilderController extends Controller
             'departments' => [
                 'name' => app()->getLocale() === 'ar' ? 'الأقسام' : 'Departments',
                 'columns' => [
-                    'id', 'name', 'name_ar', 'ticket_prefix', 'ticket_current_seq',
+                    'id', 'name', 'name_ar', 'sequence_prefix', 'sequence_counter', 'sequence_year',
                     'is_active', 'created_at',
                 ],
                 'with' => [],
