@@ -119,6 +119,8 @@ fi
 
 # Step 6: Setup Database
 print_header "Step 6: Setting Up Database"
+echo "Note: SQLite uses WAL mode for better multi-user concurrency"
+echo ""
 
 # Get database configuration from .env
 DB_CONNECTION=$(grep "^DB_CONNECTION=" .env | cut -d '=' -f 2)

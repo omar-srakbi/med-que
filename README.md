@@ -117,7 +117,7 @@ A comprehensive clinic management system built with Laravel 12 for managing pati
 
 ### Server Requirements:
 - **PHP:** 8.4 or higher
-- **Database:** SQLite (default) or MySQL/PostgreSQL
+- **Database:** SQLite with WAL mode (default) or MySQL/PostgreSQL
 - **Web Server:** Apache/Nginx or PHP built-in server
 - **Extensions:**
   - BCMath PHP Extension
@@ -169,6 +169,8 @@ DB_CONNECTION=sqlite
 # DB_USERNAME=root
 # DB_PASSWORD=
 ```
+
+**Note:** SQLite uses WAL (Write-Ahead Logging) mode by default for better multi-user concurrency.
 
 ### 5. Run Migrations & Seeders
 ```bash
@@ -609,8 +611,8 @@ Built with:
 
 ---
 
-**Last Updated:** April 2026  
-**Version:** 1.2.0
+**Last Updated:** April 2026
+**Version:** 1.2.01
 
 ---
 

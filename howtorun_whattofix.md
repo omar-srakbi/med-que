@@ -59,6 +59,8 @@ php artisan migrate
 php artisan db:seed
 ```
 
+**Note:** SQLite uses WAL (Write-Ahead Logging) mode for better multi-user concurrency. The `-wal` and `-shm` files next to the database are normal and required.
+
 ### Step 5: Start Development Server
 
 ```bash
@@ -144,7 +146,22 @@ php artisan config:clear
 php artisan view:clear
 ```
 
-### 8. Shared Ticket Sequence System (Latest Update)
+### 8. SQLite WAL Mode for Multi-User Access (Latest Update)
+**Problem:** SQLite default mode blocks concurrent reads during writes
+**Solution:** Enabled WAL (Write-Ahead Logging) mode in `config/database.php`
+
+**Benefits:**
+- Readers don't block writers
+- Writers don't block readers
+- Better performance for multi-user scenarios
+- Improved crash recovery
+
+**Files Modified:**
+- `config/database.php` - Added `'journal_mode' => 'wal'`
+
+**Note:** If you see `database.sqlite-wal` and `database.sqlite-shm` files, these are normal and required for WAL mode.
+
+### 9. Shared Ticket Sequence System
 **Problem:** Departments had isolated ticket counters, limiting sequence capacity
 **Solution:** Implemented shared yearly sequence with per-department queue prefixes
 
@@ -200,6 +217,9 @@ php artisan migrate  # Runs all pending migrations
 - **Latest:** Changed to shared yearly sequence system (2-char + 8-digit)
 - **Latest:** Queue number uses per-department prefix (daily reset)
 
+### `config/database.php`
+- **Latest:** Enabled SQLite WAL mode for improved multi-user concurrency
+
 ### `app/Http/Controllers/DepartmentController.php`
 - **Latest:** Added `checkQueuePrefix()` API for availability checking
 - **Latest:** Added `findNextAvailablePrefix()` helper method
@@ -232,6 +252,9 @@ php artisan migrate  # Runs all pending migrations
 
 ### `routes/web.php`
 - **Latest:** Added `departments.check-queue-prefix` route
+
+### `config/database.php`
+- Added `'journal_mode' => 'wal'` to SQLite connection for better concurrency
 
 ### `database/migrations/`
 - `2026_03_31_212014_update_department_sequence_system.php` - New sequence columns
@@ -296,4 +319,4 @@ php artisan view:clear
 ---
 
 ## Last Updated
-2026-04-01 (v1.2.0)
+2026-04-01 (v1.2.01)
