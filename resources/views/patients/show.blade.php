@@ -25,11 +25,11 @@
                 <p><small class="text-muted">{{ $patient->created_at->format('Y-m-d H:i') }}</small></p>
                 
                 <div class="mt-3">
-                    @can('create_patients')
+                    @if(auth()->user()->hasPermission('manage_patients') || auth()->user()->hasPermission('create_patients'))
                     <a href="{{ route('patients.edit', $patient) }}" class="btn btn-sm btn-warning">
                         <i class="bi bi-pencil"></i> {{ app()->getLocale() === 'ar' ? 'تعديل' : 'Edit' }}
                     </a>
-                    @endcan
+                    @endif
                     <a href="{{ route('patients.index') }}" class="btn btn-sm btn-secondary">
                         <i class="bi bi-arrow-left"></i> {{ app()->getLocale() === 'ar' ? 'رجوع' : 'Back' }}
                     </a>

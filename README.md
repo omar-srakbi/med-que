@@ -297,7 +297,7 @@ When creating a new department:
 | Create Payments | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
 | View Medical Records | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
 | Manage Medical Records | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Quick Registration | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Quick Registration | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Complete Patient Profiles | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
 | Manage Settings | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
 | **Full System Access** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
@@ -336,15 +336,17 @@ When creating a new department:
 
 #### **Receptionist**
 - Add and edit patient information
-- Quick patient registration
 - Complete incomplete patient profiles
 - Answer patient inquiries
+- **Limited:** No quick registration (full patient registration only)
 
 #### **Cashier**
 - Create tickets for same-day visits
-- Process payments
-- Print receipts
-- Quick patient registration
+- Process payments & print receipts
+- **Add new patients** (full registration with complete information)
+- Edit patient information
+- Manage settings
+- **Limited:** No quick registration (must fill complete patient form)
 
 #### **Head Cashier**
 - All Cashier permissions
@@ -378,6 +380,12 @@ Password: head123
 ```
 Email: doctor@example.com
 Password: doctor123
+```
+
+### Receptionist Account (Demo)
+```
+Email: receptionist@example.com
+Password: receptionist123
 ```
 
 ### ⚠️ Security Notice

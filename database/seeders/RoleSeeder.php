@@ -23,10 +23,10 @@ class RoleSeeder extends Seeder
             ['name' => 'Radiology Tech', 'name_ar' => 'فني أشعة', 'is_system' => true, 'permissions' => ['view_patients', 'view_medical_records', 'manage_medical_records'], 'sort_order' => 4],
 
             // Front desk
-            ['name' => 'Receptionist', 'name_ar' => 'موظف استقبال', 'is_system' => true, 'permissions' => ['view_patients', 'manage_patients', 'quick_registration', 'complete_patient_profiles'], 'sort_order' => 5],
+            ['name' => 'Receptionist', 'name_ar' => 'موظف استقبال', 'is_system' => true, 'permissions' => ['view_patients', 'manage_patients', 'complete_patient_profiles'], 'sort_order' => 5],
 
             // Cashiers
-            ['name' => 'Cashier', 'name_ar' => 'أمين صندوق', 'is_system' => true, 'permissions' => ['view_patients', 'manage_patients', 'create_tickets', 'create_payments', 'manage_settings', 'quick_registration'], 'sort_order' => 6],
+            ['name' => 'Cashier', 'name_ar' => 'أمين صندوق', 'is_system' => true, 'permissions' => ['view_patients', 'manage_patients', 'create_tickets', 'create_payments', 'manage_settings'], 'sort_order' => 6],
             ['name' => 'Head Cashier', 'name_ar' => 'أمين صندوق رئيسي', 'is_system' => true, 'permissions' => ['view_patients', 'manage_patients', 'create_tickets', 'delete_tickets', 'create_advance_tickets', 'create_payments', 'manage_settings', 'quick_registration'], 'sort_order' => 7],
 
             // Patient role (limited access)

@@ -167,11 +167,11 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    @can('create_patients')
+                    @if(auth()->user()->hasPermission('manage_patients') || auth()->user()->hasPermission('create_patients'))
                     <a href="{{ route('patients.create') }}" class="btn btn-outline-primary">
                         <i class="bi bi-person-plus"></i> {{ app()->getLocale() === 'ar' ? 'إضافة مريض' : 'Add Patient' }}
                     </a>
-                    @endcan
+                    @endif
                     @can('create_tickets')
                     <a href="{{ route('tickets.create') }}" class="btn btn-outline-success">
                         <i class="bi bi-ticket-perforated"></i> {{ app()->getLocale() === 'ar' ? 'إنشاء تذكرة' : 'Create Ticket' }}

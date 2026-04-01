@@ -7,7 +7,7 @@ use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class AdminCredentialsSeeder extends Seeder
+class EmployeesCredentialsSeeder extends Seeder
 {
     public function run(): void
     {
@@ -15,26 +15,13 @@ class AdminCredentialsSeeder extends Seeder
         $cashierRole = Role::where('name', 'Cashier')->first();
         $headCashierRole = Role::where('name', 'Head Cashier')->first();
         $doctorRole = Role::where('name', 'Doctor')->first();
+        $receptionistRole = Role::where('name', 'Receptionist')->first();
         
         if (!$adminRole) {
             $this->command->error('Admin role not found!');
             return;
         }
-        
-        // Create additional admin user
-        User::updateOrCreate(
-            ['email' => 'admin2@example.com'],
-            [
-                'role_id' => $adminRole->id,
-                'first_name' => 'Admin',
-                'last_name' => 'Two',
-                'email' => 'admin2@example.com',
-                'password' => Hash::make('admin123'),
-                'phone' => '0987654321',
-                'is_active' => true,
-            ]
-        );
-        
+
         // Create cashier user
         if ($cashierRole) {
             User::updateOrCreate(
@@ -82,18 +69,26 @@ class AdminCredentialsSeeder extends Seeder
                 ]
             );
         }
+
+        // Create receptionist user (demo)
+        if ($receptionistRole) {
+            User::updateOrCreate(
+                ['email' => 'receptionist@example.com'],
+                [
+                    'role_id' => $receptionistRole->id,
+                    'first_name' => 'Receptionist',
+                    'last_name' => 'Demo',
+                    'email' => 'receptionist@example.com',
+                    'password' => Hash::make('receptionist123'),
+                    'phone' => '4444444444',
+                    'is_active' => true,
+                ]
+            );
+        }
         
         $this->command->info('===========================================');
-        $this->command->info('       USER CREDENTIALS CREATED');
+        $this->command->info('       EMPLOYEE CREDENTIALS CREATED');
         $this->command->info('===========================================');
-        $this->command->info('Admin 1:');
-        $this->command->info('  Email: admin@example.com');
-        $this->command->info('  Password: password');
-        $this->command->info('');
-        $this->command->info('Admin 2:');
-        $this->command->info('  Email: admin2@example.com');
-        $this->command->info('  Password: admin123');
-        $this->command->info('');
         $this->command->info('Cashier:');
         $this->command->info('  Email: cashier@example.com');
         $this->command->info('  Password: cashier123');
@@ -105,6 +100,10 @@ class AdminCredentialsSeeder extends Seeder
         $this->command->info('Doctor:');
         $this->command->info('  Email: doctor@example.com');
         $this->command->info('  Password: doctor123');
+        $this->command->info('');
+        $this->command->info('Receptionist (Demo):');
+        $this->command->info('  Email: receptionist@example.com');
+        $this->command->info('  Password: receptionist123');
         $this->command->info('===========================================');
     }
 }

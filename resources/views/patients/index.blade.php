@@ -7,11 +7,11 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-people"></i> {{ app()->getLocale() === 'ar' ? 'قائمة المرضى' : 'Patient List' }}</span>
-        @can('create_patients')
+        @if(auth()->user()->hasPermission('manage_patients') || auth()->user()->hasPermission('create_patients'))
         <a href="{{ route('patients.create') }}" class="btn btn-sm btn-primary">
             <i class="bi bi-plus"></i> {{ app()->getLocale() === 'ar' ? 'إضافة مريض' : 'Add Patient' }}
         </a>
-        @endcan
+        @endif
     </div>
     <div class="card-body">
         <!-- Search Form -->
