@@ -68,7 +68,7 @@ class MedicalRecordController extends Controller
 
     public function show(MedicalRecord $medicalRecord)
     {
-        $medicalRecord->load(['patient', 'department', 'doctor', 'ticket']);
+        $medicalRecord->load(['patient', 'department', 'doctor', 'ticket', 'updater']);
         return view('medical-records.show', compact('medicalRecord'));
     }
 
@@ -91,9 +91,12 @@ class MedicalRecordController extends Controller
             'test_results' => 'nullable|string',
             'follow_up_date' => 'nullable|date|after:today',
         ]);
-        
+
+        // Track who edited this record
+        $validated['updated_by'] = auth()->id();
+
         $medicalRecord->update($validated);
-        
+
         return redirect()->route('medical-records.show', $medicalRecord)
             ->with('success', app()->getLocale() === 'ar' ? 'تم تحديث السجل الطبي بنجاح' : 'Medical record updated successfully');
     }

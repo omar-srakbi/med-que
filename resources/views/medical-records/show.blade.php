@@ -16,7 +16,13 @@
                     <a href="{{ route('patients.show', $medicalRecord->patient) }}">{{ $medicalRecord->patient->full_name }}</a>
                 </p>
                 <p><strong>{{ app()->getLocale() === 'ar' ? 'القسم' : 'Department' }}:</strong><br>{{ app()->getLocale() === 'ar' ? $medicalRecord->department->name_ar : $medicalRecord->department->name }}</p>
-                <p><strong>{{ app()->getLocale() === 'ar' ? 'الطبيب' : 'Doctor' }}:</strong><br>{{ $medicalRecord->doctor->full_name }}</p>
+                <p><strong>{{ app()->getLocale() === 'ar' ? 'الطبيب' : 'Created By' }}:</strong><br>{{ $medicalRecord->doctor->full_name }}</p>
+                @if($medicalRecord->updated_by)
+                <p><strong>{{ app()->getLocale() === 'ar' ? 'آخر تعديل بواسطة' : 'Last Edited By' }}:</strong><br>
+                    {{ $medicalRecord->updater->full_name }} 
+                    <small class="text-muted">({{ $medicalRecord->updated_at->diffForHumans() }})</small>
+                </p>
+                @endif
                 <p><strong>{{ app()->getLocale() === 'ar' ? 'موعد المتابعة' : 'Follow-up Date' }}:</strong><br>
                     {{ $medicalRecord->follow_up_date?->format('Y-m-d') ?? '-' }}
                 </p>

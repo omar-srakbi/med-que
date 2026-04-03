@@ -14,6 +14,7 @@ class MedicalRecord extends Model
         'patient_id',
         'department_id',
         'doctor_id',
+        'updated_by',
         'ticket_id',
         'diagnosis',
         'prescriptions',
@@ -48,5 +49,10 @@ class MedicalRecord extends Model
     public function ticket(): BelongsTo
     {
         return $this->belongsTo(Ticket::class);
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }
