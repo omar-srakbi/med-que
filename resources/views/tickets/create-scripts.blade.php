@@ -3,7 +3,7 @@ const isArabic = {{ app()->getLocale() === 'ar' ? 'true' : 'false' }};
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Page loaded');
-    
+
     // Get elements
     const quickSelectInput = document.getElementById('quick_select');
     const departmentSelect = document.getElementById('department_id');
@@ -11,23 +11,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const quickSelectResult = document.getElementById('quick_select_result');
     const priceInfo = document.getElementById('price-info');
     const servicePrice = document.getElementById('service-price');
-    
+    const submitBtn = document.getElementById('submit_ticket');
+
     console.log('Elements found:', {
         quick: !!quickSelectInput,
         dept: !!departmentSelect,
-        service: !!serviceSelect
+        service: !!serviceSelect,
+        submit: !!submitBtn
     });
     
     // Quick Select - Handle Enter/Tab
     if (quickSelectInput) {
         quickSelectInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' || e.key === 'Tab') {
-                e.preventDefault();
                 const value = this.value.trim().toUpperCase();
                 console.log('Quick select triggered:', value);
-                
-                if (!value) return;
-                
+
+                if (!value) {
+                    // Let Tab work normally (move to next field)
+                    if (e.key === 'Tab') return;
+                    // For Enter, just do nothing if empty
+                    e.preventDefault();
+                    return;
+                }
+
+                e.preventDefault();
+
                 // Try to find service by shortcut
                 let found = false;
                 for (let i = 0; i < departmentSelect.options.length; i++) {
@@ -54,44 +63,74 @@ document.addEventListener('DOMContentLoaded', function() {
                                     
                                     setTimeout(() => {
                                         serviceSelect.value = s.id;
-                                        
-                                        quickSelectResult.innerHTML = '<span class="text-success">✓ ' + (isArabic ? 'تم الاختيار' : 'Selected') + ': ' + 
+
+                                        quickSelectResult.innerHTML = '<span class="text-success">✓ ' + (isArabic ? 'تم الاختيار' : 'Selected') + ': ' +
                                             (isArabic ? s.name_ar : s.name) + '</span>';
                                         this.value = '';
-                                        
-                                        const patientField = document.getElementById('patient_search');
-                                        if (patientField) patientField.focus();
+                                        this.blur();
+
+                                        if (submitBtn) {
+                                            console.log('Focusing submit button (shortcut)');
+                                            submitBtn.focus();
+                                        } else {
+                                            console.error('Submit button not found');
+                                        }
                                     }, 300);
-                                    
+
                                     return;
                                 }
                             }
                         });
                 }
-                
+
                 // If no shortcut found, try numeric format (1, 1.2, etc)
                 setTimeout(() => {
                     if (found) return;
-                    
+
                     const parts = value.split('.');
                     const deptIndex = parseInt(parts[0]);
                     const serviceIndex = parts.length > 1 ? parseInt(parts[1]) : 1;
-                    
+
+                    console.log('Numeric quick select:', { deptIndex, serviceIndex });
+
+                    // Validate inputs
+                    if (isNaN(deptIndex) || deptIndex < 1) {
+                        console.log('Invalid department index');
+                        return;
+                    }
+
                     for (let i = 0; i < departmentSelect.options.length; i++) {
                         const opt = departmentSelect.options[i];
-                        if (opt.dataset.index == deptIndex) {
+                        if (!opt.value) continue;
+                        
+                        const optIndex = parseInt(opt.dataset.index);
+                        console.log('Checking dept option:', { optIndex, deptIndex, match: optIndex === deptIndex });
+                        
+                        if (optIndex === deptIndex) {
+                            console.log('Selected department:', opt.value);
                             departmentSelect.value = opt.value;
                             const event = new Event('change');
                             departmentSelect.dispatchEvent(event);
-                            
+
                             setTimeout(() => {
                                 const validServices = Array.from(serviceSelect.options).filter(o => o.value);
-                                if (serviceIndex <= validServices.length) {
-                                    serviceSelect.value = validServices[serviceIndex - 1].value;
-                                    quickSelectResult.innerHTML = '<span class="text-success">✓ ' + (isArabic ? 'تم الاختيار' : 'Selected') + '</span>';
-                                    this.value = '';
-                                    const patientField = document.getElementById('patient_search');
-                                    if (patientField) patientField.focus();
+                                console.log('Available services:', validServices.length);
+
+                                if (isNaN(serviceIndex) || serviceIndex < 1 || serviceIndex > validServices.length) {
+                                    console.error('Invalid service index:', serviceIndex, 'max:', validServices.length);
+                                    quickSelectResult.innerHTML = '<span class="text-danger">✗ ' + (isArabic ? 'خدمة غير صحيحة' : 'Invalid service') + '</span>';
+                                    return;
+                                }
+
+                                serviceSelect.value = validServices[serviceIndex - 1].value;
+                                quickSelectResult.innerHTML = '<span class="text-success">✓ ' + (isArabic ? 'تم الاختيار' : 'Selected') + ': ' +
+                                    (isArabic ? validServices[serviceIndex - 1].dataset.nameAr : validServices[serviceIndex - 1].text.split(' - ')[0]) + '</span>';
+                                this.value = '';
+                                this.blur();
+
+                                if (submitBtn) {
+                                    console.log('Focusing submit button (numeric)');
+                                    submitBtn.focus();
                                 }
                             }, 300);
                             break;
@@ -127,6 +166,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         const priceText = parseFloat(s.price).toFixed(currencyDecimals);
                         opt.textContent = (isArabic ? s.name_ar : s.name) + ' - ' + priceText + ' ' + currencySymbol;
                         opt.dataset.price = s.price;
+                        opt.dataset.nameAr = s.name_ar;
+                        opt.dataset.nameEn = s.name;
                         serviceSelect.appendChild(opt);
                     });
                     
@@ -158,11 +199,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const patientSearch = document.getElementById('patient_search');
     const patientIdField = document.getElementById('patient_id');
     const patientResults = document.getElementById('patient_results');
+    const addPatientLink = document.getElementById('add_patient_link');
     const patients = @json($patients ?? []);
     let selectedPatientId = null;
     let filteredPatients = [];
 
     console.log('Patients loaded:', patients.length);
+
+    // Show add patient link when user types a name that doesn't match any existing patient
+    patientSearch.addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+        const matchedPatient = patients.find(p => (p.full_name || '').toLowerCase() === query);
+        
+        if (query.length >= 2 && !matchedPatient) {
+            // Show add patient link when typing a new name
+            addPatientLink.style.display = 'inline-block';
+            // Update link to include return URL and pre-fill patient name
+            const returnUrl = encodeURIComponent(window.location.href);
+            const patientName = encodeURIComponent(patientSearch.value.trim());
+            addPatientLink.href = `{{ route('patients.create') }}?return_url=${returnUrl}&name=${patientName}`;
+        } else {
+            // Hide link when patient matches or input is empty
+            addPatientLink.style.display = 'none';
+        }
+    });
 
     // Filter patients based on search query
     function filterPatients(query) {
@@ -305,6 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Create new patient
                 e.preventDefault();
                 const btn = form.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
                 btn.disabled = true;
                 btn.innerHTML = '⏳ Creating...';
 
@@ -325,14 +386,34 @@ document.addEventListener('DOMContentLoaded', function() {
                         patientSearch.parentNode.insertBefore(alert, patientSearch.nextSibling);
                         setTimeout(() => alert.remove(), 3000);
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="bi bi-check-circle"></i> ' + (isArabic ? 'إنشاء ودفع' : 'Create & Pay');
+                        btn.innerHTML = originalText;
                         form.submit();
+                    } else if (data.action === 'not_found') {
+                        // Patient not found and user doesn't have quick registration permission
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+
+                        const alert = document.createElement('div');
+                        alert.className = 'alert alert-danger alert-dismissible fade show mt-2';
+                        alert.innerHTML = `<i class="bi bi-person-x"></i> ${isArabic
+                            ? 'المريض غير موجود. ليس لديك صلاحية إنشاء مريض جديد. يرجى اختيار مريض من القائمة.'
+                            : 'Patient not found. You do not have permission to create a new patient. Please select an existing patient from the list.'
+                        }<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                        patientSearch.parentNode.insertBefore(alert, patientSearch.nextSibling);
+                        setTimeout(() => alert.remove(), 7000);
                     }
                 })
                 .catch(err => {
                     console.error(err);
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-check-circle"></i> ' + (isArabic ? 'إنشاء ودفع' : 'Create & Pay');
+                    btn.innerHTML = originalText;
+                    
+                    // Show error to user
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-danger alert-dismissible fade show mt-2';
+                    alert.innerHTML = `<i class="bi bi-exclamation-triangle"></i> ${isArabic ? 'حدث خطأ أثناء إنشاء المريض. يرجى المحاولة مرة أخرى.' : 'Error creating patient. Please try again.'}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                    patientSearch.parentNode.insertBefore(alert, patientSearch.nextSibling);
+                    setTimeout(() => alert.remove(), 5000);
                 });
             });
         }
@@ -424,5 +505,11 @@ function selectPatient(id, text) {
 #patient_search:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+#submit_ticket:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.5), 0 0 15px rgba(13, 110, 253, 0.3);
+    outline: 3px solid #0d6efd;
+    outline-offset: 2px;
 }
 </style>

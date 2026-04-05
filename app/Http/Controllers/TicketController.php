@@ -86,32 +86,31 @@ class TicketController extends Controller
         // Get service price
         $service = Service::findOrFail($validated['service_id']);
 
-        // Get department for sequence
-        $department = Department::findOrFail($validated['department_id']);
-
-        // Get or create global sequence (shared across all departments with same prefix)
-        $currentYear = (int) now()->year;
-        $sequence = TicketSequence::getOrCreate($department->sequence_prefix, $currentYear);
-
-        // Reset sequence if new year
-        $sequence->resetForYear($currentYear);
-
-        // Generate queue number for this department (per-day, unique prefix + 4 digits)
-        $queueNumber = Ticket::where('department_id', $validated['department_id'])
-            ->whereDate('visit_date', $validated['visit_date'])
-            ->count() + 1;
-        $queuePrefix = $department->queue_prefix ?? 'Q';
-        $queueNumberFormatted = $queuePrefix . str_pad($queueNumber, 4, '0', STR_PAD_LEFT);
-
-        // Get next sequence number (increments globally)
-        $nextNumber = $sequence->getNext();
-        $sequenceNumber = str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
-
-        // Generate ticket number: 2-char prefix + 8-digit sequence
-        $ticketNumber = $department->sequence_prefix . $sequenceNumber;
-        
         DB::beginTransaction();
         try {
+            // Get department for sequence (locked to prevent concurrent modifications)
+            $department = Department::lockForUpdate()->findOrFail($validated['department_id']);
+
+            // Get or create global sequence with locking (shared across all departments with same prefix)
+            $currentYear = (int) now()->year;
+            $sequence = TicketSequence::lockForUpdate()->firstOrCreate(
+                ['sequence_prefix' => $department->sequence_prefix, 'sequence_year' => $currentYear],
+                ['sequence_counter' => 0]
+            );
+            $sequence->increment('sequence_counter');
+            $sequenceNumber = str_pad($sequence->sequence_counter, 8, '0', STR_PAD_LEFT);
+
+            // Generate queue number for this department (per-day, unique prefix + 4 digits)
+            $queueCount = Ticket::where('department_id', $validated['department_id'])
+                ->whereDate('visit_date', $validated['visit_date'])
+                ->lockForUpdate()
+                ->count();
+            $queuePrefix = $department->queue_prefix ?? 'Q';
+            $queueNumberFormatted = $queuePrefix . str_pad($queueCount + 1, 4, '0', STR_PAD_LEFT);
+
+            // Generate ticket number: 2-char prefix + 8-digit sequence
+            $ticketNumber = $department->sequence_prefix . $sequenceNumber;
+
             // Create ticket
             $ticket = Ticket::create([
                 'ticket_number' => $ticketNumber,
@@ -126,10 +125,13 @@ class TicketController extends Controller
                 'is_advance_booking' => $isAdvance,
                 'booking_date' => $isAdvance ? today() : null,
             ]);
-            
-            // Create payment
-            $receiptNumber = 'RCP-' . date('Ymd') . '-' . str_pad(Payment::whereDate('created_at', today())->count() + 1, 4, '0', STR_PAD_LEFT);
-            
+
+            // Create payment with locked receipt number generation
+            $receiptCount = Payment::whereDate('created_at', today())
+                ->lockForUpdate()
+                ->count();
+            $receiptNumber = 'RCP-' . date('Ymd') . '-' . str_pad($receiptCount + 1, 4, '0', STR_PAD_LEFT);
+
             Payment::create([
                 'ticket_id' => $ticket->id,
                 'amount' => $service->price,
@@ -137,12 +139,12 @@ class TicketController extends Controller
                 'receipt_number' => $receiptNumber,
                 'cashier_id' => auth()->id(),
             ]);
-            
+
             DB::commit();
-            
+
             return redirect()->route('tickets.receipt', $ticket)
                 ->with('success', app()->getLocale() === 'ar' ? 'تم إنشاء التذكرة بنجاح' : 'Ticket created successfully');
-                
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Failed to create ticket: ' . $e->getMessage()]);

@@ -25,9 +25,12 @@ class PatientController extends Controller
         return view('patients.index', compact('patients'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return view('patients.create');
+        $returnUrl = $request->input('return_url');
+        $patientName = $request->input('name', '');
+        
+        return view('patients.create', compact('returnUrl', 'patientName'));
     }
 
     public function store(Request $request)
@@ -44,9 +47,17 @@ class PatientController extends Controller
         ]);
         
         $validated['created_by'] = auth()->id();
-        
+
         Patient::create($validated);
-        
+
+        // Redirect back to ticket creation if return_url is provided
+        $returnUrl = $request->input('return_url');
+        if ($returnUrl) {
+            return redirect($returnUrl)->with('success', app()->getLocale() === 'ar' 
+                ? 'تم إنشاء المريض بنجاح' 
+                : 'Patient created successfully');
+        }
+
         return redirect()->route('patients.index')
             ->with('success', app()->getLocale() === 'ar' ? 'تم إضافة المريض بنجاح' : 'Patient added successfully');
     }

@@ -47,12 +47,12 @@ class Setting extends Model
     
     public static function getCurrencyCode()
     {
-        return self::where('key', 'currency_code')->first()?->value ?? 'JOD';
+        return self::where('key', 'currency_code')->first()?->value ?? 'SYP';
     }
-    
+
     public static function getCurrencySymbol()
     {
-        return self::where('key', 'currency_symbol')->first()?->value ?? 'JD';
+        return self::where('key', 'currency_symbol')->first()?->value ?? 'ل.س';
     }
     
     public static function getCurrencyDecimals()

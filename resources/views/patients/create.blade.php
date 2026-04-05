@@ -11,20 +11,21 @@
     <div class="card-body">
         <form action="{{ route('patients.store') }}" method="POST">
             @csrf
+            <input type="hidden" name="return_url" value="{{ $returnUrl ?? '' }}">
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="first_name" class="form-label">{{ app()->getLocale() === 'ar' ? 'الاسم الأول' : 'First Name' }} <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('first_name') is-invalid @enderror" 
-                           id="first_name" name="first_name" value="{{ old('first_name') }}" required>
+                    <input type="text" class="form-control @error('first_name') is-invalid @enderror"
+                           id="first_name" name="first_name" value="{{ old('first_name', explode(' ', $patientName)[0] ?? '') }}" required>
                     @error('first_name')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                
+
                 <div class="col-md-6 mb-3">
                     <label for="last_name" class="form-label">{{ app()->getLocale() === 'ar' ? 'اسم العائلة' : 'Last Name' }} <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('last_name') is-invalid @enderror" 
-                           id="last_name" name="last_name" value="{{ old('last_name') }}" required>
+                    <input type="text" class="form-control @error('last_name') is-invalid @enderror"
+                           id="last_name" name="last_name" value="{{ old('last_name', count(explode(' ', $patientName)) > 1 ? implode(' ', array_slice(explode(' ', $patientName), 1)) : '') }}" required>
                     @error('last_name')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -95,7 +96,7 @@
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-check-circle"></i> {{ app()->getLocale() === 'ar' ? 'حفظ' : 'Save' }}
                 </button>
-                <a href="{{ route('patients.index') }}" class="btn btn-secondary">
+                <a href="{{ $returnUrl ?? route('patients.index') }}" class="btn btn-secondary">
                     <i class="bi bi-x-circle"></i> {{ app()->getLocale() === 'ar' ? 'إلغاء' : 'Cancel' }}
                 </a>
             </div>

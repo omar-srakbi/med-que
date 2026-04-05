@@ -14,7 +14,7 @@ class ReportSettingsSeeder extends Seeder
     {
         // General Settings
         ReportSetting::set('report_date_format', 'Y-m-d', 'string', 'general');
-        ReportSetting::set('report_currency', 'JOD', 'string', 'general');
+        ReportSetting::set('report_currency', 'SYP', 'string', 'general');
         ReportSetting::set('report_decimal_separator', '.', 'string', 'general');
         ReportSetting::set('report_decimal_places', '2', 'integer', 'general');
 

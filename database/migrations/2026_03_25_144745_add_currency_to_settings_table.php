@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->string('currency_code')->default('JOD')->after('value');
-            $table->string('currency_symbol')->default('JD')->after('currency_code');
+            $table->string('currency_code')->default('SYP')->after('value');
+            $table->string('currency_symbol')->default('ل.س')->after('currency_code');
             $table->integer('currency_decimals')->default(2)->after('currency_symbol');
         });
     }

@@ -11,6 +11,13 @@
                 <i class="bi bi-ticket-perforated"></i> {{ app()->getLocale() === 'ar' ? 'بيانات التذكرة' : 'Ticket Information' }}
             </div>
             <div class="card-body">
+                @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show">
+                    <i class="bi bi-check-circle"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                @endif
+
                 <form action="{{ route('tickets.store') }}" method="POST">
                     @csrf
 
@@ -52,6 +59,12 @@
                         @error('patient_id')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
+                        <div class="mt-1">
+                            <a href="{{ route('patients.create') }}" class="text-decoration-none" id="add_patient_link" style="display: none;">
+                                <i class="bi bi-person-plus"></i>
+                                <span>{{ app()->getLocale() === 'ar' ? 'إضافة مريض جديد' : 'Add New Patient' }}</span>
+                            </a>
+                        </div>
                         @if($canBookAdvance ?? false)
                         <small class="text-success mt-1 d-block">
                             <i class="bi bi-lightning-charge"></i>
@@ -94,6 +107,11 @@
                         @error('department_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        @if($errors->has('department'))
+                            <div class="alert alert-danger mt-2 mb-0">
+                                <i class="bi bi-exclamation-triangle"></i> {{ $errors->first('department') }}
+                            </div>
+                        @endif
                     </div>
 
                     <div class="mb-3">
@@ -116,7 +134,7 @@
                     </div>
                     
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" id="submit_ticket" class="btn btn-primary">
                             <i class="bi bi-check-circle"></i> {{ app()->getLocale() === 'ar' ? 'إنشاء ودفع' : 'Create & Pay' }}
                         </button>
                         <a href="{{ route('tickets.index') }}" class="btn btn-secondary">
