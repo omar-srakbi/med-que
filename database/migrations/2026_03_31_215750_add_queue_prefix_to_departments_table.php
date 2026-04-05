@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('departments', function (Blueprint $table) {
-            $table->string('queue_prefix', 2)->default('Q')->after('sequence_prefix');
+            $table->string('queue_prefix', 2)->nullable()->after('sequence_prefix');
         });
     }
 

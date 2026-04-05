@@ -11,12 +11,12 @@ class DepartmentSeeder extends Seeder
     public function run(): void
     {
         $departments = [
-            ['name' => 'Clinics', 'name_ar' => 'العيادات', 'description' => 'General and specialized clinics'],
-            ['name' => 'Kidney Center', 'name_ar' => 'مركز الكلى', 'description' => 'Kidney diseases and dialysis'],
-            ['name' => 'Blood Laboratory', 'name_ar' => 'مختبر الدم', 'description' => 'Blood tests and analysis'],
-            ['name' => 'Radiology Center', 'name_ar' => 'مركز الأشعة', 'description' => 'X-ray and imaging services'],
-            ['name' => 'MRI', 'name_ar' => 'الرنين المغناطيسي', 'description' => 'Magnetic resonance imaging'],
-            ['name' => 'Physiological Treatment', 'name_ar' => 'العلاج الطبيعي', 'description' => 'Physical therapy and rehabilitation'],
+            ['name' => 'Clinics', 'name_ar' => 'العيادات', 'description' => 'General and specialized clinics', 'queue_prefix' => 'Q1', 'sequence_prefix' => 'TK'],
+            ['name' => 'Kidney Center', 'name_ar' => 'مركز الكلى', 'description' => 'Kidney diseases and dialysis', 'queue_prefix' => 'Q2', 'sequence_prefix' => 'TK'],
+            ['name' => 'Blood Laboratory', 'name_ar' => 'مختبر الدم', 'description' => 'Blood tests and analysis', 'queue_prefix' => 'Q3', 'sequence_prefix' => 'TK'],
+            ['name' => 'Radiology Center', 'name_ar' => 'مركز الأشعة', 'description' => 'X-ray and imaging services', 'queue_prefix' => 'Q4', 'sequence_prefix' => 'TK'],
+            ['name' => 'MRI', 'name_ar' => 'الرنين المغناطيسي', 'description' => 'Magnetic resonance imaging', 'queue_prefix' => 'Q5', 'sequence_prefix' => 'TK'],
+            ['name' => 'Physiological Treatment', 'name_ar' => 'العلاج الطبيعي', 'description' => 'Physical therapy and rehabilitation', 'queue_prefix' => 'Q6', 'sequence_prefix' => 'TK'],
         ];
 
         foreach ($departments as $dept) {
@@ -24,6 +24,8 @@ class DepartmentSeeder extends Seeder
                 'name' => $dept['name'],
                 'name_ar' => $dept['name_ar'],
                 'description' => $dept['description'],
+                'queue_prefix' => $dept['queue_prefix'],
+                'sequence_prefix' => $dept['sequence_prefix'],
             ]);
 
             // Add default services for each department

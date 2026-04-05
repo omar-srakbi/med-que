@@ -110,8 +110,10 @@ fi
 
 # Step 5: Generate Application Key
 print_header "Step 5: Generating Application Key"
-if grep -q "^APP_KEY=" .env && ! grep -q "^APP_KEY=base64:" .env 2>/dev/null || grep -q "^APP_KEY=$" .env 2>/dev/null; then
-    php artisan key:generate
+APP_KEY_VALUE=$(grep "^APP_KEY=" .env | cut -d '=' -f 2)
+
+if [ -z "$APP_KEY_VALUE" ] || [ "$APP_KEY_VALUE" = "" ]; then
+    php artisan key:generate --force
     print_success "Application key generated"
 else
     print_warning "Application key already set. Skipping..."
@@ -119,32 +121,15 @@ fi
 
 # Step 6: Setup Database
 print_header "Step 6: Setting Up Database"
-echo "Note: SQLite uses WAL mode for better multi-user concurrency"
+echo "Note: migrate:fresh will automatically create the SQLite database file"
 echo ""
 
-# Get database configuration from .env
+# Verify database configuration
 DB_CONNECTION=$(grep "^DB_CONNECTION=" .env | cut -d '=' -f 2)
 
 case "$DB_CONNECTION" in
     sqlite)
-        DB_DATABASE=$(grep "^DB_DATABASE=" .env | cut -d '=' -f 2)
-        
-        # If DB_DATABASE is empty or :memory:, use default
-        if [ -z "$DB_DATABASE" ] || [ "$DB_DATABASE" = ":memory:" ]; then
-            DB_DATABASE="database/database.sqlite"
-            echo "DB_DATABASE=$DB_DATABASE" >> .env
-        fi
-        
-        # Create database directory if it doesn't exist
-        mkdir -p "$(dirname "$DB_DATABASE")"
-        
-        # Create database file if it doesn't exist
-        if [ ! -f "$DB_DATABASE" ]; then
-            touch "$DB_DATABASE"
-            print_success "SQLite database created at: $DB_DATABASE"
-        else
-            print_warning "SQLite database already exists at: $DB_DATABASE"
-        fi
+        print_success "SQLite database configured"
         ;;
     mysql|pgsql|sqlsrv)
         print_warning "$DB_CONNECTION database detected. Please ensure database is created and configured manually."
@@ -155,41 +140,21 @@ case "$DB_CONNECTION" in
         ;;
 esac
 
-# Step 7: Run Migrations
-print_header "Step 7: Running Database Migrations"
-php artisan migrate --force
-print_success "Database migrations completed"
+# Step 7: Run Migrations and Seeders
+print_header "Step 7: Running Migrations and Seeders"
+echo "Running fresh migrations with seeders..."
+migrateOutput=$(php artisan migrate:fresh --seed --force 2>&1)
+migrateExitCode=$?
 
-# Step 8: Run Seeders
-print_header "Step 8: Running Database Seeders"
-php artisan db:seed --force
-print_success "Database seeders completed"
+if [ $migrateExitCode -ne 0 ]; then
+    print_error "Migration or seeding failed!"
+    echo "$migrateOutput"
+    exit 1
+fi
 
-# Step 9: Setup Department Prefixes (Shared Ticket Sequence + Unique Queue Prefixes)
-print_header "Step 9: Configuring Department Prefixes"
-php artisan tinker --execute="
-\$depts = [
-    1 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q1'],
-    2 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q2'],
-    3 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q3'],
-    4 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q4'],
-    5 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q5'],
-    6 => ['sequence_prefix' => 'TK', 'queue_prefix' => 'Q6'],
-];
-foreach(\$depts as \$id => \$data) {
-    App\Models\Department::find(\$id)?->update(\$data);
-}
-echo 'Done';
-"
-print_success "Department prefixes configured (shared ticket sequence + unique queue prefixes)"
-
-# Step 10: Clear Caches
-print_header "Step 10: Clearing Caches"
-php artisan cache:clear
-php artisan config:clear
-php artisan view:clear
-php artisan route:clear
-print_success "Caches cleared"
+# Show last few lines of success
+echo "$migrateOutput" | tail -n 5
+print_success "Database migrations and seeders completed successfully"
 
 # Final Summary
 print_header "Setup Complete!"
