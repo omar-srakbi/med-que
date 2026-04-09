@@ -13,6 +13,9 @@
                 <i class="bi bi-hdd"></i> {{ app()->getLocale() === 'ar' ? 'مخزن' : 'Cached' }} {{ $cachedAt->diffForHumans() }}
             </span>
             @endif
+            <a href="{{ route('reports.builder.permissions', $report) }}" class="btn btn-sm btn-outline-info" title="{{ app()->getLocale() === 'ar' ? 'إدارة الصلاحيات' : 'Manage Permissions' }}">
+                <i class="bi bi-shield-lock"></i> {{ app()->getLocale() === 'ar' ? 'الصلاحيات' : 'Permissions' }}
+            </a>
             <a href="{{ route('reports.builder.edit', $report) }}" class="btn btn-sm btn-warning" title="{{ app()->getLocale() === 'ar' ? 'تعديل التقرير' : 'Edit Report' }}">
                 <i class="bi bi-pencil"></i> {{ app()->getLocale() === 'ar' ? 'تعديل' : 'Edit' }}
             </a>

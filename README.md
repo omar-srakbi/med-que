@@ -93,7 +93,11 @@ A comprehensive clinic management system built with Laravel 12 for managing pati
   - Ticket summary
   - Service utilization
   - Staff activity
-- ⚠️ **Custom report builder** - create your own reports *(Experimental)*
+- ✅ **Custom report builder** - create your own reports with simple or advanced modes
+- ✅ **Report permissions management** - control who can view, edit, delete, or export each custom report
+  - Grant permissions to specific users or entire roles
+  - User-specific permissions take priority over role permissions
+  - Fine-grained control: View, Edit, Delete, Export
 - ✅ **Multiple export formats:**
   - CSV export
   - PDF export
@@ -341,6 +345,7 @@ When creating a new department:
 | Quick Registration | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Complete Patient Profiles | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
 | Manage Settings | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Manage Report Permissions | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Full System Access** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ### Role Descriptions
@@ -350,6 +355,7 @@ When creating a new department:
 - Can manage all roles and permissions
 - Can delete any record
 - Access to audit logs
+- Can manage report permissions (control who can access custom reports)
 
 #### **Doctor**
 - View patient information and history
@@ -399,38 +405,14 @@ When creating a new department:
 
 ## 🔐 Default Credentials
 
-### Administrator Account
 ```
 Email: admin@example.com
 Password: password
 ```
 
-### Cashier Account
-```
-Email: cashier@example.com
-Password: cashier123
-```
+See [SUPPORT.md](SUPPORT.md) for other accounts and instuctions.
 
-### Head Cashier Account
-```
-Email: headcashier@example.com
-Password: head123
-```
-
-### Doctor Account
-```
-Email: doctor@example.com
-Password: doctor123
-```
-
-### Receptionist Account (Demo)
-```
-Email: receptionist@example.com
-Password: receptionist123
-```
-
-### ⚠️ Security Notice
-**Change these passwords immediately after first login!**
+> ⚠️ **Change default password after first login!**
 
 ---
 
@@ -478,6 +460,32 @@ Password: receptionist123
 ### Reports
 
 Go to **Reports** and pick the report you need. You can filter by date, department, or patient. All reports support export to CSV, PDF, and Excel.
+
+### Report Permissions (Custom Reports Only)
+**EXPERIMENTAL**
+
+Control who can access your custom reports:
+
+1. Go to **Reports → Builder**
+2. Click the 🛡️ **Permissions** icon on any custom report
+3. Add permissions by selecting:
+   - A specific **user**, OR
+   - An entire **role**
+4. Set access levels:
+   - 👁️ **Can View** - Access to view the report
+   - ✏️ **Can Edit** - Modify report configuration
+   - 🗑️ **Can Delete** - Remove the report
+   - 📥 **Can Export** - Export report data
+
+**Permission Priority:**
+- User-specific permissions take priority over role permissions
+- Example: If a user is explicitly denied but their role is allowed, the user **cannot** access the report
+- If no user permission exists, the system falls back to role permissions
+
+**Notes:**
+- Report owner always has full access
+- If a report is marked as public, everyone can view it
+- Permissions are enforced on view, edit, delete, and export actions
 
 ---
 
@@ -601,7 +609,7 @@ Built with:
 ---
 
 **Last Updated:** April 2026
-**Version:** 1.3.00
+**Version:** 1.3.01
 
 ---
 

@@ -240,15 +240,46 @@ Then run:
 
 ---
 
-## 📋 Quick Reference
+## 🔐 Login Credentials
 
-### Default Admin Account
-```
-Email: admin@example.com
-Password: password
-```
+### Default Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | admin@example.com | password |
+| **Head Cashier** | headcashier@example.com | head123 |
+| **Cashier** | cashier@example.com | cashier123 |
+| **Doctor** | doctor@example.com | doctor123 |
+| **Receptionist** | receptionist@example.com | receptionist123 |
 
 > ⚠️ **Change all default passwords immediately after first login!**
+
+### Special Passwords
+
+| Purpose | Password |
+|---------|----------|
+| Delete Admin Role | `1234` |
+
+### Login URL
+```
+http://localhost:8000/login
+```
+
+### How to Create New Admin
+
+1. Login as Admin
+2. Go to **Staff → Add Staff**
+3. Fill in name, email, password
+4. Set **Role: Admin**
+5. Save
+
+### How to Create Other Staff
+
+Same process — pick the role you need (Nurse, Lab Tech, Radiology Tech, etc.). Accounts are created from the Staff page, not from seeders.
+
+---
+
+## 📋 Quick Reference
 
 ### Common Commands
 

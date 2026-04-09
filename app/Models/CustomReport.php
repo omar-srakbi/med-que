@@ -96,16 +96,21 @@ class CustomReport extends Model
             return true;
         }
 
-        // Check permissions
-        $permission = $this->permissions()
-            ->where(function($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->orWhere('role_id', $user->role_id);
-            })
-            ->where('can_view', true)
+        // Check user-specific permission first (takes priority)
+        $userPermission = $this->permissions()
+            ->where('user_id', $user->id)
             ->first();
 
-        return $permission !== null;
+        if ($userPermission) {
+            return $userPermission->can_view;
+        }
+
+        // Fall back to role permission
+        $rolePermission = $this->permissions()
+            ->where('role_id', $user->role_id)
+            ->first();
+
+        return $rolePermission ? $rolePermission->can_view : false;
     }
 
     public function canEdit($user): bool
@@ -115,16 +120,21 @@ class CustomReport extends Model
             return true;
         }
 
-        // Check permissions
-        $permission = $this->permissions()
-            ->where(function($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->orWhere('role_id', $user->role_id);
-            })
-            ->where('can_edit', true)
+        // Check user-specific permission first (takes priority)
+        $userPermission = $this->permissions()
+            ->where('user_id', $user->id)
             ->first();
 
-        return $permission !== null;
+        if ($userPermission) {
+            return $userPermission->can_edit;
+        }
+
+        // Fall back to role permission
+        $rolePermission = $this->permissions()
+            ->where('role_id', $user->role_id)
+            ->first();
+
+        return $rolePermission ? $rolePermission->can_edit : false;
     }
 
     public function canDelete($user): bool
@@ -134,16 +144,21 @@ class CustomReport extends Model
             return true;
         }
 
-        // Check permissions
-        $permission = $this->permissions()
-            ->where(function($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->orWhere('role_id', $user->role_id);
-            })
-            ->where('can_delete', true)
+        // Check user-specific permission first (takes priority)
+        $userPermission = $this->permissions()
+            ->where('user_id', $user->id)
             ->first();
 
-        return $permission !== null;
+        if ($userPermission) {
+            return $userPermission->can_delete;
+        }
+
+        // Fall back to role permission
+        $rolePermission = $this->permissions()
+            ->where('role_id', $user->role_id)
+            ->first();
+
+        return $rolePermission ? $rolePermission->can_delete : false;
     }
 
     public function canExport($user): bool
@@ -153,16 +168,21 @@ class CustomReport extends Model
             return true;
         }
 
-        // Check permissions
-        $permission = $this->permissions()
-            ->where(function($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->orWhere('role_id', $user->role_id);
-            })
-            ->where('can_export', true)
+        // Check user-specific permission first (takes priority)
+        $userPermission = $this->permissions()
+            ->where('user_id', $user->id)
             ->first();
 
-        return $permission !== null;
+        if ($userPermission) {
+            return $userPermission->can_export;
+        }
+
+        // Fall back to role permission
+        $rolePermission = $this->permissions()
+            ->where('role_id', $user->role_id)
+            ->first();
+
+        return $rolePermission ? $rolePermission->can_export : false;
     }
 
     public function getCache(): ?array

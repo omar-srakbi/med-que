@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\PatientSearchController;
 use App\Http\Controllers\ReportSettingsController;
 use App\Http\Controllers\ReportBuilderController;
 use App\Http\Controllers\ReportExportController;
+use App\Http\Controllers\ReportPermissionController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes
@@ -134,7 +135,13 @@ Route::middleware('auth')->group(function () {
     Route::post('reports/builder/preview', [ReportBuilderController::class, 'preview'])->name('reports.builder.preview');
     Route::get('reports/builder/{report}/show', [ReportBuilderController::class, 'show'])->name('reports.builder.show');
     Route::post('reports/builder/{report}/update-labels', [ReportBuilderController::class, 'updateLabels'])->name('reports.builder.update-labels');
-    
+
+    // Report permissions
+    Route::get('reports/builder/{report}/permissions', [ReportPermissionController::class, 'index'])->name('reports.builder.permissions');
+    Route::post('reports/builder/{report}/permissions', [ReportPermissionController::class, 'store'])->name('reports.builder.permissions.store');
+    Route::put('reports/builder/{report}/permissions/{permission}', [ReportPermissionController::class, 'update'])->name('reports.builder.permissions.update');
+    Route::delete('reports/builder/{report}/permissions/{permission}', [ReportPermissionController::class, 'destroy'])->name('reports.builder.permissions.destroy');
+
     // Search
     Route::get('search', [SearchController::class, 'search'])->name('search');
     

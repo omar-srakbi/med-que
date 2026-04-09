@@ -61,6 +61,9 @@
                                 <a href="{{ route('reports.builder.show', $report) }}" class="btn btn-info">
                                     <i class="bi bi-eye"></i>
                                 </a>
+                                <a href="{{ route('reports.builder.permissions', $report) }}" class="btn btn-outline-info" title="{{ app()->getLocale() === 'ar' ? 'إدارة الصلاحيات' : 'Manage Permissions' }}">
+                                    <i class="bi bi-shield-lock"></i>
+                                </a>
                                 @can('edit', $report)
                                 <a href="{{ route('reports.builder.edit', $report) }}" class="btn btn-warning">
                                     <i class="bi bi-pencil"></i>

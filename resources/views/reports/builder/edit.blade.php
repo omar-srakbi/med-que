@@ -5,8 +5,16 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header">
-        <h5><i class="bi bi-pencil"></i> {{ app()->getLocale() === 'ar' ? 'تعديل التقرير' : 'Edit Report' }}</h5>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-pencil"></i> {{ app()->getLocale() === 'ar' ? 'تعديل التقرير' : 'Edit Report' }}</h5>
+        <div class="d-flex gap-2">
+            <a href="{{ route('reports.builder.permissions', $report) }}" class="btn btn-sm btn-outline-info" title="{{ app()->getLocale() === 'ar' ? 'إدارة الصلاحيات' : 'Manage Permissions' }}">
+                <i class="bi bi-shield-lock"></i> {{ app()->getLocale() === 'ar' ? 'الصلاحيات' : 'Permissions' }}
+            </a>
+            <a href="{{ route('reports.builder.show', $report) }}" class="btn btn-sm btn-secondary">
+                <i class="bi bi-eye"></i> {{ app()->getLocale() === 'ar' ? 'عرض التقرير' : 'View Report' }}
+            </a>
+        </div>
     </div>
     <div class="card-body">
         @if($errors->any())
